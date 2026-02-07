@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutorial-Werkstatt - Galerie</title>
+    <style>
+        :root {
+            --primary: #2e7d32;
+            --primary-light: #4caf50;
+            --primary-dark: #1b5e20;
+            --primary-bg: #e8f5e9;
+            --text: #333;
+            --text-light: #666;
+            --text-muted: #999;
+            --bg: #f5f5f5;
+            --bg-white: #fff;
+            --border: #ddd;
+            --border-light: #eee;
+            --danger: #d32f2f;
+            --warning: #f57c00;
+            --success: #388e3c;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .gallery-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 40px 32px;
+            text-align: center;
+        }
+
+        .gallery-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .gallery-header .subtitle {
+            font-size: 16px;
+            opacity: 0.85;
+            margin-bottom: 20px;
+        }
+
+        .header-nav {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .header-link {
+            display: inline-block;
+            background: rgba(255,255,255,0.15);
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+
+        .header-link:hover {
+            background: rgba(255,255,255,0.25);
+        }
+
+        /* Toolbar */
+        .gallery-toolbar {
+            background: var(--bg-white);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .search-wrapper {
+            flex: 1;
+            min-width: 200px;
+            position: relative;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 16px;
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+
+        .search-wrapper input {
+            width: 100%;
+            padding: 10px 12px 10px 40px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 15px;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        .search-wrapper input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(46,125,50,0.1);
+        }
+
+        .toolbar-info {
+            font-size: 14px;
+            color: var(--text-light);
+            white-space: nowrap;
+        }
+
+        /* Grid */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 24px;
+            padding: 32px;
+            flex: 1;
+        }
+
+        /* Cards */
+        .tutorial-card {
+            background: var(--bg-white);
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .tutorial-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        }
+
+        .card-accent {
+            height: 4px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+        }
+
+        .card-body {
+            padding: 20px 24px;
+            flex: 1;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
+        .card-description {
+            font-size: 14px;
+            color: var(--text-light);
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+
+        .card-meta {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 12px;
+            font-size: 13px;
+        }
+
+        .meta-steps {
+            background: var(--primary-bg);
+            color: var(--primary);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+
+        .meta-url {
+            color: var(--text-muted);
+            text-decoration: none;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .meta-url:hover {
+            color: var(--primary);
+        }
+
+        .card-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .step-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+            color: white;
+        }
+
+        .type-click { background: #7b1fa2; }
+        .type-input { background: #0288d1; }
+        .type-navigate { background: #00796b; }
+        .type-drag { background: #e64a19; }
+        .type-local_action { background: #5d4037; }
+        .type-wait { background: #616161; }
+
+        /* Card Footer */
+        .card-footer {
+            padding: 16px 24px;
+            border-top: 1px solid var(--border-light);
+            text-align: center;
+        }
+
+        .bookmarklet-link {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: grab;
+            transition: transform 0.2s, box-shadow 0.2s;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .bookmarklet-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(46,125,50,0.3);
+        }
+
+        .bookmarklet-link:active {
+            cursor: grabbing;
+        }
+
+        .card-footer .hint {
+            display: block;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 8px;
+        }
+
+        /* Loading State */
+        .loading-state {
+            text-align: center;
+            padding: 80px 32px;
+            color: var(--text-light);
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 80px 32px;
+            color: var(--text-light);
+        }
+
+        .empty-state .empty-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+
+        .empty-state h3 {
+            font-size: 20px;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
+        .empty-state a {
+            color: var(--primary);
+        }
+
+        /* Footer */
+        .gallery-footer {
+            background: var(--bg-white);
+            border-top: 1px solid var(--border);
+            padding: 24px 32px;
+            text-align: center;
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .gallery-footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .gallery-footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Error Toast */
+        .error-banner {
+            background: #fff3e0;
+            border: 1px solid #ffe0b2;
+            color: #e65100;
+            padding: 12px 24px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .gallery-header { padding: 28px 16px; }
+            .gallery-header h1 { font-size: 22px; }
+            .gallery-toolbar { padding: 12px 16px; }
+            .gallery-grid {
+                grid-template-columns: 1fr;
+                padding: 16px;
+                gap: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="gallery-header">
+        <h1>Tutorial-Werkstatt</h1>
+        <p class="subtitle">Interaktive Anleitungen zum Mitnehmen</p>
+        <nav class="header-nav">
+            <a href="index.html" class="header-link">Zum Editor</a>
+        </nav>
+    </header>
+
+    <div class="gallery-toolbar">
+        <div class="search-wrapper">
+            <span class="search-icon">&#128269;</span>
+            <input type="text" id="searchInput" placeholder="Tutorials durchsuchen..." />
+        </div>
+        <div class="toolbar-info">
+            <span id="tutorialCount"></span>
+        </div>
+    </div>
+
+    <div id="loadingState" class="loading-state">
+        <div class="spinner"></div>
+        <p>Tutorials werden geladen...</p>
+    </div>
+
+    <div id="galleryGrid" class="gallery-grid" style="display:none;"></div>
+
+    <div id="emptyState" class="empty-state" style="display:none;">
+        <div class="empty-icon">&#128218;</div>
+        <h3>Keine Tutorials gefunden</h3>
+        <p>Erstelle ein Tutorial im <a href="index.html">Editor</a>.</p>
+    </div>
+
+    <footer class="gallery-footer">
+        <p>Tutorial-Werkstatt &mdash; Start with a Friend</p>
+        <p><a href="index.html">Editor &ouml;ffnen</a></p>
+    </footer>
+
+    <script>
+    (function() {
+        'use strict';
+
+        var tutorials = [];
+        var grid = document.getElementById('galleryGrid');
+        var searchInput = document.getElementById('searchInput');
+        var tutorialCount = document.getElementById('tutorialCount');
+        var emptyState = document.getElementById('emptyState');
+        var loadingState = document.getElementById('loadingState');
+
+        // ==========================================
+        // Hilfsfunktionen
+        // ==========================================
+
+        function escapeHtml(str) {
+            var div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        function getDomain(url) {
+            try { return new URL(url).hostname; }
+            catch(e) { return url; }
+        }
+
+        function countStepTypes(steps) {
+            var counts = {};
+            (steps || []).forEach(function(s) {
+                var type = s.type || 'unknown';
+                counts[type] = (counts[type] || 0) + 1;
+            });
+            return counts;
+        }
+
+        // ==========================================
+        // Bookmarklet Generator
+        // KOPIE aus app.js generatePlayerCode() - synchron halten!
+        // ==========================================
+
+        function generatePlayerCode(tutorial) {
+            var tutorialData = {
+                n: tutorial.name,
+                d: tutorial.description,
+                u: tutorial.startUrl,
+                s: tutorial.steps.map(function(s) {
+                    var step = {
+                        t: s.type,
+                        d: s.description,
+                        c: s.selector,
+                        x: s.xpath,
+                        u: s.url,
+                        p: s.urlPattern,
+                        o: s.optional,
+                        e: s.isEntryPoint,
+                        v: s.exampleValue,
+                        i: s.instruction
+                    };
+                    if (s.ariaLabel) step.al = s.ariaLabel;
+                    if (s.placeholder) step.ph = s.placeholder;
+                    if (s.name) step.nm = s.name;
+                    if (s.href) step.hr = s.href;
+                    if (s.role) step.rl = s.role;
+                    if (s.title) step.ti = s.title;
+                    if (s.text) step.tx = s.text;
+                    if (s.tagName) step.tn = s.tagName;
+                    if (s.inputType) step.it = s.inputType;
+                    if (s.forAttr) step.fa = s.forAttr;
+                    if (s.label) step.lb = s.label;
+                    return step;
+                })
+            };
+
+            var playerScript = '(function(){' +
+                'var d=' + JSON.stringify(tutorialData).replace(/'/g, "\\'") + ';' +
+                'var s=0;' +
+                'var p=new URLSearchParams(location.search);' +
+                'if(p.has("_swf_step"))s=parseInt(p.get("_swf_step"));' +
+
+                'function $(q){try{return document.querySelector(q)}catch(e){return null}}' +
+                'function $c(t,a){var e=document.createElement(t);if(a)Object.keys(a).forEach(function(k){e[k]=a[k]});return e}' +
+
+                'function findEl(step){' +
+                'var el=null;' +
+                'if(step.nm){el=document.querySelector("[name=\\""+CSS.escape(step.nm)+"\\"]");if(el){console.log("SWF findEl: name="+step.nm);return el;}}' +
+                'if(step.lb){var labels=document.querySelectorAll("label");' +
+                'for(var li=0;li<labels.length;li++){var lt=(labels[li].textContent||"").trim();' +
+                'if(lt===step.lb){' +
+                'if(labels[li].htmlFor){el=document.getElementById(labels[li].htmlFor);if(el){console.log("SWF findEl: label[for]="+step.lb);return el;}}' +
+                'el=labels[li].querySelector("input,select,textarea");if(el){console.log("SWF findEl: label>input="+step.lb);return el;}' +
+                'var td=labels[li].closest("td");if(td&&td.nextElementSibling){el=td.nextElementSibling.querySelector("input,select,textarea");if(el){console.log("SWF findEl: label~td>input="+step.lb);return el;}}' +
+                '}}}' +
+                'if(step.al){el=document.querySelector("[aria-label=\\""+CSS.escape(step.al)+"\\"]");if(el){console.log("SWF findEl: aria-label="+step.al);return el;}}' +
+                'if(step.ph){el=document.querySelector("[placeholder=\\""+CSS.escape(step.ph)+"\\"]");if(el){console.log("SWF findEl: placeholder="+step.ph);return el;}}' +
+                'el=step.c?$(step.c):null;' +
+                'if(el){console.log("SWF findEl: css="+step.c);return el;}' +
+                'if(step.x){try{var r=document.evaluate(step.x,document,null,XPathResult.FIRST_ORDERED_NODE_TYPE,null);if(r.singleNodeValue){console.log("SWF findEl: xpath");return r.singleNodeValue;}}catch(e){}}' +
+                'if(step.hr){el=document.querySelector("a[href=\\""+CSS.escape(step.hr)+"\\"]");if(el){console.log("SWF findEl: href="+step.hr);return el;}' +
+                'var links=document.querySelectorAll("a[href]");for(var i=0;i<links.length;i++){if(links[i].getAttribute("href").indexOf(step.hr)!==-1){console.log("SWF findEl: href~="+step.hr);return links[i];}}}' +
+                'if(step.ti){el=document.querySelector("[title=\\""+CSS.escape(step.ti)+"\\"]");if(el){console.log("SWF findEl: title="+step.ti);return el;}}' +
+                'if(step.tx&&step.tn){var tag=step.tn.toLowerCase();var all=document.querySelectorAll(tag);' +
+                'var txt=step.tx.trim().substring(0,50);' +
+                'for(var j=0;j<all.length;j++){var ct=(all[j].textContent||"").trim();if(ct===txt||(txt.length>10&&ct.indexOf(txt)!==-1)){console.log("SWF findEl: text+tag="+txt);return all[j];}}}' +
+                'if(step.rl&&step.tx){var byRole=document.querySelectorAll("[role=\\""+step.rl+"\\"]");' +
+                'for(var k=0;k<byRole.length;k++){if((byRole[k].textContent||"").trim().indexOf(step.tx.trim().substring(0,30))!==-1){console.log("SWF findEl: role+text");return byRole[k];}}}' +
+                'console.warn("SWF findEl: NICHT GEFUNDEN",JSON.stringify({c:step.c,nm:step.nm,lb:step.lb,al:step.al,ph:step.ph,tx:step.tx}));' +
+                'return null;}' +
+
+                'function injectStyles(){' +
+                'if($("#swf-styles"))return;' +
+                'var st=$c("style",{id:"swf-styles"});' +
+                'st.textContent="' +
+                '.swf-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:999998;pointer-events:none}' +
+                '.swf-highlight{position:absolute;border:3px solid #2e7d32;border-radius:4px;box-shadow:0 0 0 4px rgba(46,125,50,0.3),0 0 20px rgba(46,125,50,0.5);pointer-events:none;z-index:999999;animation:swf-pulse 2s infinite}' +
+                '@keyframes swf-pulse{0%,100%{box-shadow:0 0 0 4px rgba(46,125,50,0.3),0 0 20px rgba(46,125,50,0.5)}50%{box-shadow:0 0 0 8px rgba(46,125,50,0.2),0 0 30px rgba(46,125,50,0.4)}}' +
+                '.swf-tooltip{position:absolute;background:#fff;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,0.2);min-width:280px;max-width:400px;z-index:1000000;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif}' +
+                '.swf-tooltip-header{background:linear-gradient(135deg,#2e7d32 0%,#1b5e20 100%);color:#fff;padding:12px 16px;border-radius:12px 12px 0 0;display:flex;justify-content:space-between;align-items:center}' +
+                '.swf-tooltip-title{font-weight:600;display:flex;align-items:center;gap:8px}' +
+                '.swf-tooltip-close{background:rgba(255,255,255,0.2);border:none;color:#fff;width:24px;height:24px;border-radius:50%;cursor:pointer;font-size:16px}' +
+                '.swf-tooltip-body{padding:16px}' +
+                '.swf-tooltip-description{font-size:15px;line-height:1.5;color:#333;margin-bottom:16px}' +
+                '.swf-tooltip-footer{display:flex;justify-content:space-between;align-items:center;padding-top:12px;border-top:1px solid #eee}' +
+                '.swf-tooltip-progress{font-size:13px;color:#666}' +
+                '.swf-tooltip-nav{display:flex;gap:8px}' +
+                '.swf-tooltip-btn{padding:8px 16px;border:none;border-radius:6px;font-size:14px;font-weight:500;cursor:pointer}' +
+                '.swf-tooltip-btn-secondary{background:#f5f5f5;color:#333}' +
+                '.swf-tooltip-btn-primary{background:#2e7d32;color:#fff}' +
+                '.swf-welcome{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,0.3);padding:40px;text-align:center;max-width:450px;z-index:1000001}' +
+                '.swf-welcome h2{color:#2e7d32;margin:16px 0 8px}' +
+                '.swf-welcome p{color:#666;margin-bottom:24px}' +
+                '.swf-welcome-start{background:linear-gradient(135deg,#2e7d32 0%,#4caf50 100%);color:#fff;border:none;padding:14px 32px;font-size:16px;font-weight:600;border-radius:30px;cursor:pointer}' +
+                '.swf-entry-points{margin-top:20px;text-align:left}' +
+                '.swf-entry-point-btn{display:block;width:100%;padding:12px 16px;margin-bottom:8px;background:#f5f5f5;border:1px solid #ddd;border-radius:8px;text-align:left;cursor:pointer}' +
+                '.swf-wrong-url{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.3);padding:32px;text-align:center;max-width:500px;z-index:1000001}' +
+                '.swf-wrong-url h3{color:#f57c00;margin:0 0 16px}' +
+                '.swf-wrong-url p{color:#666;margin:0 0 8px}' +
+                '.swf-wrong-url .url-box{background:#f5f5f5;padding:12px;border-radius:8px;margin:16px 0;word-break:break-all;font-family:monospace;font-size:13px}' +
+                '.swf-wrong-url .btn-row{display:flex;gap:12px;justify-content:center;margin-top:20px}' +
+                '";' +
+                'document.head.appendChild(st);' +
+                '}' +
+
+                'function matchUrl(pattern,url){' +
+                'if(!pattern)return true;' +
+                'var regex=pattern.split("*").map(function(s){return s.replace(/[.+?^${}()|[\\]\\\\]/g,"\\\\$&")}).join(".*");' +
+                'return new RegExp(regex,"i").test(url);' +
+                '}' +
+
+                'function checkUrlMatch(step){' +
+                'var currentUrl=location.href;' +
+                'if(step.p){return matchUrl(step.p,currentUrl);}' +
+                'if(step.u){' +
+                'var stepDomain=step.u.replace(/https?:\\/\\//,"").split("/")[0];' +
+                'var currentDomain=currentUrl.replace(/https?:\\/\\//,"").split("/")[0];' +
+                'return currentDomain===stepDomain||currentDomain.includes(stepDomain)||stepDomain.includes(currentDomain);' +
+                '}' +
+                'return true;' +
+                '}' +
+
+                'function showWelcome(){' +
+                'injectStyles();' +
+                'cleanup();' +
+                'var overlay=$c("div",{className:"swf-overlay",id:"swf-overlay"});' +
+                'overlay.style.pointerEvents="auto";' +
+                'document.body.appendChild(overlay);' +
+                'var entries=[];' +
+                'd.s.forEach(function(st,i){if(st.e)entries.push({step:i,desc:st.d});});' +
+                'var entryHtml="";' +
+                'if(entries.length>1){' +
+                'entryHtml="<div class=\\"swf-entry-points\\"><h4>Oder starte bei einem anderen Schritt:</h4>";' +
+                'entries.forEach(function(e){' +
+                'entryHtml+="<button class=\\"swf-entry-point-btn\\" data-step=\\""+e.step+"\\"><span style=\\"color:#2e7d32;font-weight:600\\">Schritt "+(e.step+1)+":</span> "+e.desc+"</button>";' +
+                '});' +
+                'entryHtml+="</div>";' +
+                '}' +
+                'var w=$c("div",{className:"swf-welcome",id:"swf-welcome"});' +
+                'w.innerHTML="<div style=\\"font-size:64px\\">\\ud83c\\udf31</div><h2>Start with a Friend</h2><p><strong>"+d.n+"</strong></p><p>"+(d.d||"Lass uns gemeinsam durch diese Anleitung gehen!")+"</p><button class=\\"swf-welcome-start\\" id=\\"swf-start\\">Los gehts!</button>"+entryHtml;' +
+                'document.body.appendChild(w);' +
+                '$("#swf-start").onclick=function(){cleanup();showStep(0)};' +
+                'w.querySelectorAll(".swf-entry-point-btn").forEach(function(btn){' +
+                'btn.onclick=function(){cleanup();showStep(parseInt(btn.dataset.step))};' +
+                '});' +
+                '}' +
+
+                'function cleanup(){' +
+                '["swf-overlay","swf-welcome","swf-highlight","swf-tooltip","swf-wrong-url","swf-local"].forEach(function(id){var e=$("#"+id);if(e)e.remove();});' +
+                '}' +
+
+                'function showWrongUrl(step,idx){' +
+                'injectStyles();' +
+                'cleanup();' +
+                'var overlay=$c("div",{className:"swf-overlay",id:"swf-overlay"});' +
+                'overlay.style.pointerEvents="auto";' +
+                'document.body.appendChild(overlay);' +
+                'var targetUrl=step.u||d.u||"";' +
+                'var hint=step.p?"URL muss dem Muster entsprechen: "+step.p:"Erwartete Seite: "+targetUrl;' +
+                'var w=$c("div",{className:"swf-wrong-url",id:"swf-wrong-url"});' +
+                'w.innerHTML="<div style=\\"font-size:48px\\">\\ud83e\\udded</div><h3>Andere Seite erwartet</h3><p>Du bist gerade auf:</p><div class=\\"url-box\\">"+location.href.substring(0,80)+"</div><p>"+hint+"</p>"+(targetUrl?"<div class=\\"btn-row\\"><button class=\\"swf-tooltip-btn swf-tooltip-btn-secondary\\" id=\\"swf-cancel\\">Abbrechen</button><button class=\\"swf-tooltip-btn swf-tooltip-btn-primary\\" id=\\"swf-go\\">Zur Seite gehen</button></div>":"<div class=\\"btn-row\\"><button class=\\"swf-tooltip-btn swf-tooltip-btn-secondary\\" id=\\"swf-cancel\\">Abbrechen</button><button class=\\"swf-tooltip-btn swf-tooltip-btn-secondary\\" id=\\"swf-skip\\">Schritt \\u00fcberspringen</button></div>");' +
+                'document.body.appendChild(w);' +
+                'if($("#swf-go"))$("#swf-go").onclick=function(){' +
+                'var newUrl=targetUrl;' +
+                'if(newUrl.indexOf("?")===-1)newUrl+="?";else newUrl+="&";' +
+                'newUrl+="_swf_step="+idx+"&_swf_data="+encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(d)))));' +
+                'location.href=newUrl;' +
+                '};' +
+                'if($("#swf-skip"))$("#swf-skip").onclick=function(){cleanup();showStep(idx+1)};' +
+                '$("#swf-cancel").onclick=cleanup;' +
+                '}' +
+
+                'function showStep(idx){' +
+                's=idx;' +
+                'if(idx>=d.s.length){' +
+                'injectStyles();cleanup();' +
+                'var overlay=$c("div",{className:"swf-overlay",id:"swf-overlay"});overlay.style.pointerEvents="auto";document.body.appendChild(overlay);' +
+                'var w=$c("div",{className:"swf-welcome",id:"swf-welcome"});' +
+                'w.innerHTML="<div style=\\"font-size:64px\\">\\ud83c\\udf89</div><h2>Geschafft!</h2><p>Du hast das Tutorial erfolgreich abgeschlossen.</p><button class=\\"swf-welcome-start\\" id=\\"swf-close\\">Schlie\\u00dfen</button>";' +
+                'document.body.appendChild(w);' +
+                '$("#swf-close").onclick=cleanup;' +
+                'return;' +
+                '}' +
+                'var step=d.s[idx];' +
+                'injectStyles();' +
+                'cleanup();' +
+                'if(step.t!=="local_action"&&step.t!=="wait"&&(step.u||step.p)){' +
+                'if(!checkUrlMatch(step)){' +
+                'showWrongUrl(step,idx);' +
+                'return;' +
+                '}' +
+                '}' +
+                'if(step.t==="local_action"||step.t==="wait"||step.t==="navigate"){' +
+                'showLocalAction(step,idx);' +
+                'return;' +
+                '}' +
+                'var el=findEl(step);' +
+                'if(!el){' +
+                'var retryCount=step._retry||0;' +
+                'if(retryCount<3){' +
+                'step._retry=retryCount+1;' +
+                'setTimeout(function(){showStep(idx);},1500);' +
+                'return;}' +
+                'if(step.o){showStep(idx+1);return;}' +
+                'var skip=confirm("Element nicht gefunden.\\n\\nBeschreibung: "+(step.d||"")+"\\nSelector: "+(step.c||"")+"\\n\\nSchritt \\u00fcberspringen?");' +
+                'if(skip)showStep(idx+1);' +
+                'return;' +
+                '}' +
+                'var rect=el.getBoundingClientRect();' +
+                'var hl=$c("div",{className:"swf-highlight",id:"swf-highlight"});' +
+                'hl.style.cssText="position:absolute;top:"+(rect.top+window.scrollY-5)+"px;left:"+(rect.left+window.scrollX-5)+"px;width:"+(rect.width+10)+"px;height:"+(rect.height+10)+"px";' +
+                'document.body.appendChild(hl);' +
+                'el.scrollIntoView({behavior:"smooth",block:"center"});' +
+                'setTimeout(function(){' +
+                'var tt=$c("div",{className:"swf-tooltip",id:"swf-tooltip"});' +
+                'var navHtml="";' +
+                'if(idx>0)navHtml+="<button class=\\"swf-tooltip-btn swf-tooltip-btn-secondary\\" id=\\"swf-prev\\">\\u2190 Zur\\u00fcck</button>";' +
+                'if(step.o)navHtml+="<button class=\\"swf-tooltip-btn swf-tooltip-btn-secondary\\" id=\\"swf-skip\\">\\u00dcberspringen</button>";' +
+                'navHtml+="<button class=\\"swf-tooltip-btn swf-tooltip-btn-primary\\" id=\\"swf-next\\">Weiter \\u2192</button>";' +
+                'tt.innerHTML="<div class=\\"swf-tooltip-header\\"><span class=\\"swf-tooltip-title\\">\\ud83c\\udf31 "+d.n+"</span><button class=\\"swf-tooltip-close\\" id=\\"swf-close\\">\\u00d7</button></div><div class=\\"swf-tooltip-body\\"><div class=\\"swf-tooltip-description\\">"+step.d+"</div><div class=\\"swf-tooltip-footer\\"><span class=\\"swf-tooltip-progress\\">Schritt "+(idx+1)+" von "+d.s.length+"</span><div class=\\"swf-tooltip-nav\\">"+navHtml+"</div></div></div>";' +
+                'var newRect=el.getBoundingClientRect();' +
+                'var top=newRect.top+window.scrollY-200;' +
+                'if(top<window.scrollY+10)top=newRect.bottom+window.scrollY+20;' +
+                'tt.style.cssText="position:absolute;top:"+top+"px;left:"+Math.max(10,newRect.left+window.scrollX-50)+"px";' +
+                'document.body.appendChild(tt);' +
+                '$("#swf-close").onclick=cleanup;' +
+                'if($("#swf-prev"))$("#swf-prev").onclick=function(){cleanup();showStep(idx-1)};' +
+                'if($("#swf-skip"))$("#swf-skip").onclick=function(){cleanup();showStep(idx+1)};' +
+                '$("#swf-next").onclick=function(){cleanup();showStep(idx+1)};' +
+                '},300);' +
+                '}' +
+
+                'function showLocalAction(step,idx){' +
+                'injectStyles();' +
+                'cleanup();' +
+                'var overlay=$c("div",{className:"swf-overlay",id:"swf-overlay"});' +
+                'overlay.style.pointerEvents="auto";' +
+                'document.body.appendChild(overlay);' +
+                'var w=$c("div",{className:"swf-welcome",id:"swf-local"});' +
+                'var icon=step.t==="navigate"?"\\ud83d\\udd17":(step.t==="wait"?"\\u23f3":"\\ud83d\\udcc1");' +
+                'var navHtml="";' +
+                'if(idx>0)navHtml+="<button class=\\"swf-tooltip-btn swf-tooltip-btn-secondary\\" id=\\"swf-prev\\" style=\\"margin-right:12px\\">\\u2190 Zur\\u00fcck</button>";' +
+                'w.innerHTML="<div style=\\"font-size:48px\\">"+icon+"</div><h2 style=\\"color:#5d4037\\">"+step.d+"</h2>"+(step.i?"<div style=\\"background:#f5f5f5;padding:16px;border-radius:8px;text-align:left;margin:20px 0\\">"+step.i+"</div>":"")+"<div style=\\"margin-top:24px\\">"+navHtml+"<button class=\\"swf-welcome-start\\" id=\\"swf-done\\">Erledigt \\u2713</button></div><p style=\\"margin-top:16px;font-size:13px;color:#999\\">Schritt "+(idx+1)+" von "+d.s.length+"</p>";' +
+                'document.body.appendChild(w);' +
+                '$("#swf-done").onclick=function(){cleanup();showStep(idx+1)};' +
+                'if($("#swf-prev"))$("#swf-prev").onclick=function(){cleanup();showStep(idx-1)};' +
+                '}' +
+
+                'var urlParams=new URLSearchParams(location.search);' +
+                'if(urlParams.has("_swf_data")){' +
+                'try{d=JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(urlParams.get("_swf_data"))))));}catch(e){console.error("SWF data parse error",e);}' +
+                '}' +
+                'if(urlParams.has("_swf_step")){' +
+                'showStep(parseInt(urlParams.get("_swf_step")));' +
+                '}else{' +
+                'showWelcome();' +
+                '}' +
+                '})();';
+
+            return 'javascript:' + encodeURIComponent(playerScript);
+        }
+
+        // ==========================================
+        // Karten rendern
+        // ==========================================
+
+        var typeLabels = {
+            click: 'Klick',
+            input: 'Eingabe',
+            navigate: 'Navigation',
+            drag: 'Drag & Drop',
+            local_action: 'Lokal',
+            wait: 'Warten'
+        };
+
+        function renderCard(tutorial) {
+            var card = document.createElement('div');
+            card.className = 'tutorial-card';
+            card.dataset.name = (tutorial.name || '').toLowerCase();
+            card.dataset.description = (tutorial.description || '').toLowerCase();
+
+            var steps = tutorial.steps || [];
+            var typeCounts = countStepTypes(steps);
+
+            var badgesHtml = '';
+            Object.keys(typeCounts).forEach(function(type) {
+                badgesHtml += '<span class="step-badge type-' + type + '">' +
+                    typeCounts[type] + 'x ' + escapeHtml(typeLabels[type] || type) + '</span>';
+            });
+
+            var metaUrlHtml = '';
+            if (tutorial.startUrl) {
+                metaUrlHtml = '<a class="meta-url" href="' + escapeHtml(tutorial.startUrl) +
+                    '" target="_blank" rel="noopener">' + escapeHtml(getDomain(tutorial.startUrl)) + '</a>';
+            }
+
+            card.innerHTML =
+                '<div class="card-accent"></div>' +
+                '<div class="card-body">' +
+                '<h3 class="card-title">' + escapeHtml(tutorial.name || 'Unbenannt') + '</h3>' +
+                '<p class="card-description">' + escapeHtml(tutorial.description || '') + '</p>' +
+                '<div class="card-meta">' +
+                '<span class="meta-steps">' + steps.length + ' Schritte</span>' +
+                metaUrlHtml +
+                '</div>' +
+                '<div class="card-badges">' + badgesHtml + '</div>' +
+                '</div>' +
+                '<div class="card-footer">' +
+                '<a class="bookmarklet-link" title="Ziehe mich in deine Lesezeichenleiste!">' +
+                escapeHtml(tutorial.name || 'Tutorial') + '</a>' +
+                '<span class="hint">In Lesezeichenleiste ziehen</span>' +
+                '</div>';
+
+            // Bookmarklet-href per DOM setzen (sicher gegen Encoding-Probleme)
+            var link = card.querySelector('.bookmarklet-link');
+            link.href = generatePlayerCode(tutorial);
+
+            // Klick verhindern (soll nur gezogen werden)
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                alert('Ziehe diesen Link in deine Lesezeichenleiste, um das Tutorial zu nutzen!');
+            });
+
+            return card;
+        }
+
+        // ==========================================
+        // Galerie rendern & filtern
+        // ==========================================
+
+        function renderGallery() {
+            var query = searchInput.value.trim().toLowerCase();
+            grid.innerHTML = '';
+            var matchCount = 0;
+
+            tutorials.forEach(function(tutorial) {
+                var name = (tutorial.name || '').toLowerCase();
+                var desc = (tutorial.description || '').toLowerCase();
+                if (query && name.indexOf(query) === -1 && desc.indexOf(query) === -1) {
+                    return;
+                }
+                grid.appendChild(renderCard(tutorial));
+                matchCount++;
+            });
+
+            tutorialCount.textContent = matchCount + ' Tutorial' + (matchCount !== 1 ? 's' : '');
+            emptyState.style.display = matchCount === 0 ? 'block' : 'none';
+            grid.style.display = matchCount > 0 ? 'grid' : 'none';
+        }
+
+        // ==========================================
+        // Daten laden
+        // ==========================================
+
+        function loadTutorials() {
+            fetch('tutorials.json')
+                .then(function(r) {
+                    if (!r.ok) throw new Error('tutorials.json nicht gefunden');
+                    return r.json();
+                })
+                .then(function(index) {
+                    var promises = index.map(function(entry) {
+                        return fetch(entry.file)
+                            .then(function(r) {
+                                if (!r.ok) throw new Error(entry.file + ' nicht gefunden');
+                                return r.json();
+                            })
+                            .catch(function(err) {
+                                console.error('Fehler beim Laden:', entry.file, err);
+                                return null;
+                            });
+                    });
+                    return Promise.all(promises);
+                })
+                .then(function(results) {
+                    tutorials = results.filter(function(t) { return t !== null; });
+                    loadingState.style.display = 'none';
+                    renderGallery();
+                })
+                .catch(function(err) {
+                    console.error('Fehler beim Laden der Tutorial-Liste:', err);
+                    loadingState.innerHTML =
+                        '<div class="empty-icon">&#9888;</div>' +
+                        '<p>Tutorials konnten nicht geladen werden.</p>' +
+                        '<p style="font-size:13px;color:#999;margin-top:8px;">Die Seite muss &uuml;ber einen Webserver (oder GitHub Pages) ge&ouml;ffnet werden.</p>';
+                });
+        }
+
+        // ==========================================
+        // Events
+        // ==========================================
+
+        searchInput.addEventListener('input', function() {
+            renderGallery();
+        });
+
+        // ==========================================
+        // Start
+        // ==========================================
+
+        loadTutorials();
+    })();
+    </script>
+</body>
+</html>

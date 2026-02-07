@@ -1,0 +1,76 @@
+{
+  "id": "tutorial_beispiel_github",
+  "name": "GitHub Repository erstellen",
+  "description": "Lerne Schritt für Schritt, wie du ein neues Repository auf GitHub erstellst und deinen ersten Commit machst.",
+  "startUrl": "https://github.com",
+  "steps": [
+    {
+      "type": "navigate",
+      "description": "Öffne die GitHub Startseite",
+      "url": "https://github.com",
+      "isEntryPoint": true
+    },
+    {
+      "type": "click",
+      "selector": "[data-target='qbsearch-input.inputButtonText']",
+      "xpath": "//button[contains(@class, 'header-search')]",
+      "url": "https://github.com",
+      "description": "Falls du noch nicht eingeloggt bist, klicke oben rechts auf 'Sign in'",
+      "optional": true
+    },
+    {
+      "type": "click",
+      "selector": "a[href='/new'], button:has-text('New')",
+      "xpath": "//a[@href='/new']",
+      "url": "https://github.com",
+      "description": "Klicke auf den 'New' Button oder das '+' Symbol oben rechts, um ein neues Repository zu erstellen",
+      "isEntryPoint": true
+    },
+    {
+      "type": "input",
+      "selector": "#repository_name, input[name='repository[name]']",
+      "xpath": "//input[@id='repository_name']",
+      "url": "https://github.com/new",
+      "description": "Gib einen Namen für dein Repository ein. Der Name sollte kurz und beschreibend sein.",
+      "exampleValue": "mein-erstes-projekt"
+    },
+    {
+      "type": "input",
+      "selector": "#repository_description, textarea[name='repository[description]']",
+      "xpath": "//textarea[@id='repository_description']",
+      "url": "https://github.com/new",
+      "description": "Optional: Füge eine kurze Beschreibung hinzu, damit andere wissen, worum es in deinem Projekt geht.",
+      "exampleValue": "Mein erstes GitHub Projekt zum Lernen",
+      "optional": true
+    },
+    {
+      "type": "click",
+      "selector": "input[type='radio'][value='public'], #repository_visibility_public",
+      "xpath": "//input[@value='public']",
+      "url": "https://github.com/new",
+      "description": "Wähle 'Public' wenn dein Projekt für alle sichtbar sein soll, oder 'Private' für private Projekte",
+      "optional": true
+    },
+    {
+      "type": "click",
+      "selector": "#repository_auto_init",
+      "xpath": "//input[@id='repository_auto_init']",
+      "url": "https://github.com/new",
+      "description": "Aktiviere 'Add a README file' - das erstellt automatisch eine Beschreibungsdatei für dein Projekt",
+      "optional": true
+    },
+    {
+      "type": "click",
+      "selector": "button[type='submit']:has-text('Create repository'), .btn-primary[type='submit']",
+      "xpath": "//button[contains(text(), 'Create repository')]",
+      "url": "https://github.com/new",
+      "description": "Klicke auf 'Create repository' um dein neues Repository zu erstellen!"
+    },
+    {
+      "type": "local_action",
+      "description": "Glückwunsch! Dein Repository wurde erstellt!",
+      "instruction": "Du siehst jetzt die Hauptseite deines neuen Repositories. Von hier aus kannst du:\n\n• Dateien hinzufügen über 'Add file'\n• Das Repository auf deinen Computer klonen\n• Die README-Datei bearbeiten\n\nDas Tutorial ist damit abgeschlossen. Viel Spaß beim Coden!",
+      "isEntryPoint": false
+    }
+  ]
+}

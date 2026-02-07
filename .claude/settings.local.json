@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -m http.server:*)",
+      "Bash(dir /s \"C:\\\\Users\\\\Acer\\\\Downloads\\\\Interaktives Lernen\")",
+      "Bash(dir:*)",
+      "Bash(node -e \"try { new Function\\(require\\(''fs''\\).readFileSync\\(''C:\\\\Users\\\\Acer\\\\Downloads\\\\Interaktives Lernen\\\\app.js'', ''utf8''\\)\\); console.log\\(''Syntax OK''\\); } catch\\(e\\) { console.error\\(''Syntax Error:'', e.message\\); }\")",
+      "Bash(node:*)",
+      "Bash(cmd.exe /c \"where node 2>nul\")",
+      "Bash(cmd.exe /c \"node --version\")",
+      "Bash(cmd.exe /c \"node --version && echo NODE_FOUND\")",
+      "Bash(cmd.exe /c \"echo %PATH%\")",
+      "Bash(export PATH=\"$PATH:/c/Program Files/nodejs:/c/Users/Acer/AppData/Roaming/npm:/c/Users/Acer/AppData/Local/Programs/nodejs\")",
+      "Bash(powershell -Command:*)",
+      "Bash(powershell -File - <<'PS1'\n$c = [System.IO.File]::ReadAllText\\('C:\\\\Users\\\\Acer\\\\Downloads\\\\Interaktives Lernen\\\\app.js'\\)\n$ob = \\([char[]]$c | Where-Object { $_ -eq [char]'{' } | Measure-Object\\).Count\n$cb = \\([char[]]$c | Where-Object { $_ -eq [char]'}' } | Measure-Object\\).Count\n$op = \\([char[]]$c | Where-Object { $_ -eq [char]'\\(' } | Measure-Object\\).Count\n$cp = \\([char[]]$c | Where-Object { $_ -eq [char]'\\)' } | Measure-Object\\).Count\nWrite-Host \"Braces: open=$ob close=$cb\"\nWrite-Host \"Parens: open=$op close=$cp\"\nPS1)",
+      "Bash(powershell -File - <<'PS1'\nforeach \\($f in @\\('C:\\\\Users\\\\Acer\\\\Downloads\\\\Interaktives Lernen\\\\app.js','C:\\\\Users\\\\Acer\\\\Downloads\\\\Interaktives Lernen\\\\recorder.js'\\)\\) {\n  $c = [System.IO.File]::ReadAllText\\($f\\)\n  $ob = \\([char[]]$c | Where-Object { $_ -eq [char]'{' } | Measure-Object\\).Count\n  $cb = \\([char[]]$c | Where-Object { $_ -eq [char]'}' } | Measure-Object\\).Count\n  $op = \\([char[]]$c | Where-Object { $_ -eq [char]'\\(' } | Measure-Object\\).Count\n  $cp = \\([char[]]$c | Where-Object { $_ -eq [char]'\\)' } | Measure-Object\\).Count\n  $name = [System.IO.Path]::GetFileName\\($f\\)\n  Write-Host \"$name - Braces: $ob/$cb  Parens: $op/$cp\"\n}\nPS1)",
+      "Bash(powershell:*)",
+      "Bash(gh:*)",
+      "Bash(git --version:*)",
+      "Bash(winget install:*)",
+      "Bash(\"/c/Program Files/GitHub CLI/gh.exe\" auth status)",
+      "Bash(git init:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git config:*)"
+    ]
+  }
+}

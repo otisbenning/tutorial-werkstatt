@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutorial-Werkstatt - Start with a Friend</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <h1>Tutorial-Werkstatt</h1>
+            <p class="subtitle">Erstelle interaktive Anleitungen für Web-Anwendungen</p>
+        </header>
+
+        <!-- Toolbar -->
+        <div class="toolbar">
+            <div class="toolbar-left">
+                <a id="recorderBookmarklet" class="bookmarklet-link" href="javascript:void(0);" title="Ziehe mich in deine Lesezeichenleiste!">
+                    Aufnahme starten
+                </a>
+                <span class="hint">Ziehe in Lesezeichenleiste</span>
+            </div>
+            <div class="toolbar-right">
+                <button id="btnNewTutorial" class="btn btn-primary">+ Neues Tutorial</button>
+                <button id="btnImport" class="btn btn-secondary">Import JSON</button>
+                <button id="btnExportAll" class="btn btn-secondary">Export Alle</button>
+                <input type="file" id="fileImport" accept=".json" style="display: none;">
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Tutorial Liste -->
+            <aside class="tutorial-list-panel">
+                <h2>Meine Tutorials</h2>
+                <ul id="tutorialList" class="tutorial-list">
+                    <!-- Dynamisch gefüllt -->
+                </ul>
+                <p id="emptyState" class="empty-state">
+                    Noch keine Tutorials vorhanden.<br>
+                    Starte eine Aufnahme oder importiere ein Tutorial.
+                </p>
+            </aside>
+
+            <!-- Editor -->
+            <main class="editor-panel">
+                <div id="noTutorialSelected" class="no-selection">
+                    <div class="no-selection-content">
+                        <div class="icon-large">📚</div>
+                        <h3>Willkommen in der Tutorial-Werkstatt!</h3>
+                        <p>Wähle ein Tutorial aus der Liste oder erstelle ein neues.</p>
+                        <div class="quick-start">
+                            <h4>So funktioniert's:</h4>
+                            <ol>
+                                <li>Ziehe <strong>"Aufnahme starten"</strong> in deine Lesezeichenleiste</li>
+                                <li>Gehe zur Webseite, für die du ein Tutorial erstellen möchtest</li>
+                                <li>Klicke auf das Lesezeichen um die Aufnahme zu starten</li>
+                                <li>Führe die Schritte durch und beschreibe sie</li>
+                                <li>Beende die Aufnahme und bearbeite hier das Tutorial</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tutorialEditor" class="tutorial-editor" style="display: none;">
+                    <!-- Tutorial Metadaten -->
+                    <div class="editor-header">
+                        <div class="form-group">
+                            <label for="tutorialName">Tutorial-Name:</label>
+                            <input type="text" id="tutorialName" placeholder="z.B. GitHub Repository erstellen">
+                        </div>
+                        <div class="form-group">
+                            <label for="tutorialDescription">Beschreibung:</label>
+                            <textarea id="tutorialDescription" placeholder="Was lernt man in diesem Tutorial?"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="tutorialStartUrl">Start-URL:</label>
+                            <input type="url" id="tutorialStartUrl" placeholder="https://example.com">
+                        </div>
+                    </div>
+
+                    <!-- Schritte -->
+                    <div class="steps-section">
+                        <div class="steps-header">
+                            <h3>Schritte</h3>
+                            <button id="btnAddStep" class="btn btn-small">+ Schritt hinzufügen</button>
+                        </div>
+                        <ul id="stepsList" class="steps-list">
+                            <!-- Dynamisch gefüllt -->
+                        </ul>
+                    </div>
+
+                    <!-- Bookmarklet Generator -->
+                    <div class="bookmarklet-section">
+                        <h3>Generiertes Tutorial-Bookmarklet</h3>
+                        <div class="bookmarklet-output">
+                            <a id="generatedBookmarklet" class="bookmarklet-link bookmarklet-generated" href="javascript:void(0);">
+                                <span id="bookmarkletName">Tutorial</span>
+                            </a>
+                            <span class="hint">Ziehe in Lesezeichenleiste zum Nutzen</span>
+                            <button id="btnCopyBookmarklet" class="btn btn-small">Code kopieren</button>
+                            <button id="btnExportTutorial" class="btn btn-small">Als JSON exportieren</button>
+                        </div>
+                    </div>
+
+                    <!-- Aktionen -->
+                    <div class="editor-actions">
+                        <button id="btnSaveTutorial" class="btn btn-primary">Speichern</button>
+                        <button id="btnDeleteTutorial" class="btn btn-danger">Tutorial löschen</button>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- Schritt bearbeiten Modal -->
+        <div id="stepModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="stepModalTitle">Schritt bearbeiten</h3>
+                    <button class="modal-close" id="btnCloseStepModal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="stepType">Schritt-Typ:</label>
+                        <select id="stepType">
+                            <option value="click">Klick</option>
+                            <option value="input">Eingabe</option>
+                            <option value="navigate">Navigation</option>
+                            <option value="drag">Drag & Drop</option>
+                            <option value="local_action">Lokale Aktion</option>
+                            <option value="wait">Warten</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="stepDescription">Beschreibung für Nutzer:</label>
+                        <textarea id="stepDescription" placeholder="Was soll der Nutzer hier tun?"></textarea>
+                    </div>
+                    <div class="form-group" id="selectorGroup">
+                        <label for="stepSelector">Trigger-Text (Element-Beschriftung):</label>
+                        <input type="text" id="stepSelector" placeholder="z.B. 'Speichern' oder 'Option A | Option B'">
+                        <small class="hint">Der sichtbare Text des Elements. Für Alternativen: Text1 | Text2 (ODER-Verknüpfung)</small>
+                    </div>
+                    <div class="form-group" id="urlGroup">
+                        <label for="stepUrl">Erwartete URL (optional):</label>
+                        <input type="url" id="stepUrl" placeholder="https://example.com/page">
+                        <small class="hint">Exakte URL oder leer lassen für Domain-Check</small>
+                    </div>
+                    <div class="form-group" id="urlPatternGroup">
+                        <label for="stepUrlPattern">URL-Muster (flexibel):</label>
+                        <input type="text" id="stepUrlPattern" placeholder="*example.com/events/* oder *calendar*">
+                        <small class="hint">Verwende * als Platzhalter. Z.B. *github.com/*/settings* für beliebige Repos</small>
+                    </div>
+                    <div class="form-group" id="inputValueGroup" style="display: none;">
+                        <label for="stepInputValue">Beispiel-Eingabe:</label>
+                        <input type="text" id="stepInputValue" placeholder="Beispieltext für Eingabefeld">
+                    </div>
+                    <div class="form-group" id="localInstructionGroup" style="display: none;">
+                        <label for="stepLocalInstruction">Detaillierte Anweisung:</label>
+                        <textarea id="stepLocalInstruction" placeholder="z.B. Öffne deinen Download-Ordner und finde die Datei 'config.json'"></textarea>
+                    </div>
+                    <div class="form-group checkbox-group">
+                        <label>
+                            <input type="checkbox" id="stepOptional">
+                            Optionaler Schritt (kann übersprungen werden)
+                        </label>
+                    </div>
+                    <div class="form-group checkbox-group">
+                        <label>
+                            <input type="checkbox" id="stepEntryPoint">
+                            Einstiegspunkt (Nutzer kann hier starten)
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="btnSaveStep" class="btn btn-primary">Speichern</button>
+                    <button id="btnCancelStep" class="btn btn-secondary">Abbrechen</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Neues Tutorial Modal -->
+        <div id="newTutorialModal" class="modal" style="display: none;">
+            <div class="modal-content modal-small">
+                <div class="modal-header">
+                    <h3>Neues Tutorial erstellen</h3>
+                    <button class="modal-close" id="btnCloseNewModal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="newTutorialName">Tutorial-Name:</label>
+                        <input type="text" id="newTutorialName" placeholder="z.B. GitHub Repository erstellen">
+                    </div>
+                    <div class="form-group">
+                        <label for="newTutorialStartUrl">Start-URL:</label>
+                        <input type="url" id="newTutorialStartUrl" placeholder="https://example.com">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="btnCreateTutorial" class="btn btn-primary">Erstellen</button>
+                    <button id="btnCancelNewTutorial" class="btn btn-secondary">Abbrechen</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Notifications -->
+        <div id="toastContainer" class="toast-container"></div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
