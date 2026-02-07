@@ -650,43 +650,100 @@ function findElement(step) {
     return null;
 }
 
-// Einzelnen Trigger suchen
+// Score berechnen für Element-Match
+function calculateMatchScore(searchLower, searchWords, item) {
+    var score = 0;
+    var itemWords = extractWords(item.name);
+
+    // 1. Exakter Match = höchste Punktzahl
+    if (item.nameLower === searchLower) {
+        return 1000;
+    }
+
+    // 2. Vollständiger Substring-Match (Trigger komplett im Element)
+    if (item.nameLower.indexOf(searchLower) !== -1) {
+        score += 100;
+        // Bonus wenn Längen ähnlich sind (verhindert Match auf viel längere Texte)
+        var lengthRatio = searchLower.length / item.nameLower.length;
+        score += Math.round(lengthRatio * 50);
+    }
+
+    // 3. Wort-basiertes Scoring
+    if (searchWords.length > 0) {
+        var matchedSearchWords = 0;
+        var matchedItemWords = 0;
+
+        // Wie viele Suchwörter sind im Element?
+        searchWords.forEach(function(sw) {
+            if (item.nameLower.indexOf(sw) !== -1) {
+                matchedSearchWords++;
+                // Bonus für längere übereinstimmende Wörter
+                score += sw.length;
+            }
+        });
+
+        // Wie viele Element-Wörter sind im Suchtext?
+        itemWords.forEach(function(iw) {
+            if (searchLower.indexOf(iw) !== -1) {
+                matchedItemWords++;
+            }
+        });
+
+        // Prozent der gefundenen Suchwörter (wichtigster Faktor!)
+        var searchWordRatio = matchedSearchWords / searchWords.length;
+        score += Math.round(searchWordRatio * 80);
+
+        // KRITISCH: Alle Suchwörter müssen vorkommen für hohen Score
+        if (matchedSearchWords === searchWords.length) {
+            score += 50; // Bonus für vollständigen Match
+        }
+
+        // Prozent der Element-Wörter die im Suchtext sind
+        if (itemWords.length > 0) {
+            var itemWordRatio = matchedItemWords / itemWords.length;
+            score += Math.round(itemWordRatio * 30);
+        }
+    }
+
+    return score;
+}
+
+// Einzelnen Trigger suchen - MIT SCORING
 function findElementByTrigger(trigger, elements) {
     var searchLower = trigger.toLowerCase();
     var searchWords = extractWords(trigger);
 
-    // Strategie 1: Exakter Match
+    // Strategie 1: Exakter Match (sofort zurück)
     var match = elements.find(function(item) {
         return item.nameLower === searchLower;
     });
     if (match) return { el: match.el, strategy: "exact" };
 
-    // Strategie 2: Trigger ist Teil des Element-Namens
-    match = elements.find(function(item) {
-        return item.nameLower.indexOf(searchLower) !== -1;
-    });
-    if (match) return { el: match.el, strategy: "partial" };
+    // Strategie 2: Score-basiertes Matching - findet BESTEN Match
+    var bestMatch = null;
+    var bestScore = 0;
+    var bestStrategy = "scored";
 
-    // Strategie 3: Element-Name ist Teil des Triggers
-    match = elements.find(function(item) {
-        return item.nameLower.length > 3 && searchLower.indexOf(item.nameLower) !== -1;
+    elements.forEach(function(item) {
+        var score = calculateMatchScore(searchLower, searchWords, item);
+        if (score > bestScore) {
+            bestScore = score;
+            bestMatch = item;
+        }
     });
-    if (match) return { el: match.el, strategy: "reverse" };
 
-    // Strategie 4: Alle wichtigen Wörter matchen
-    if (searchWords.length > 0) {
-        match = elements.find(function(item) {
-            var itemWords = extractWords(item.name);
-            // Mindestens 60% der Suchworte müssen vorkommen
-            var matchCount = searchWords.filter(function(w) {
-                return item.nameLower.indexOf(w) !== -1;
-            }).length;
-            return matchCount >= Math.ceil(searchWords.length * 0.6);
-        });
-        if (match) return { el: match.el, strategy: "words" };
+    // Mindest-Score für einen Match (verhindert falsche Matches)
+    // Score muss mindestens 50 sein (= etwa 60% Wort-Übereinstimmung)
+    if (bestMatch && bestScore >= 50) {
+        // Strategie-Namen basierend auf Score
+        if (bestScore >= 150) bestStrategy = "partial";
+        else if (bestScore >= 100) bestStrategy = "words-all";
+        else bestStrategy = "words-partial";
+
+        return { el: bestMatch.el, strategy: bestStrategy, score: bestScore };
     }
 
-    // Strategie 5: STRUKTURELLES MATCHING
+    // Strategie 3: STRUKTURELLES MATCHING (Fallback)
     // Wenn der Trigger wie ein generisches Label klingt, nach Element-Typ suchen
     var genericPatterns = [
         { pattern: /bearbeiten|edit|ändern/i, types: ["button", "link"] },
@@ -710,8 +767,7 @@ function findElementByTrigger(trigger, elements) {
         }
     }
 
-    // Strategie 6: Erstes Element des passenden Typs
-    // Wenn Trigger "Button" oder "Link" enthält
+    // Strategie 4: Erstes Element des passenden Typs
     if (/button|schaltfläche|knopf/i.test(trigger)) {
         match = elements.find(function(item) { return item.type === "button"; });
         if (match) return { el: match.el, strategy: "type-button" };
