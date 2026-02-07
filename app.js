@@ -719,46 +719,134 @@ function injectStyles() {
     if ($("#swf-styles")) return;
     var st = $c("style", { id: "swf-styles" });
     st.textContent = \`
-        .swf-sidebar {
+        /* Schwebendes Panel */
+        .swf-panel {
             position: fixed;
-            top: 0;
-            right: 0;
-            width: 320px;
-            height: 100vh;
+            top: 20px;
+            right: 20px;
+            width: 280px;
             background: #fff;
-            box-shadow: -5px 0 30px rgba(0,0,0,0.15);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
             z-index: 2147483646;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            display: flex;
-            flex-direction: column;
             overflow: hidden;
+            transition: all 0.3s ease;
         }
-        .swf-sidebar-header {
+        .swf-panel.minimized {
+            width: 180px;
+        }
+        .swf-panel.minimized .swf-panel-body {
+            display: none;
+        }
+        .swf-panel-header {
             background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);
             color: #fff;
-            padding: 16px;
+            padding: 10px 14px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            cursor: move;
+            user-select: none;
         }
-        .swf-sidebar-title {
+        .swf-panel-title {
             font-weight: 600;
-            font-size: 16px;
+            font-size: 13px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
-        .swf-sidebar-close {
+        .swf-panel-buttons {
+            display: flex;
+            gap: 4px;
+        }
+        .swf-panel-btn {
             background: rgba(255,255,255,0.2);
             border: none;
             color: #fff;
-            width: 28px;
-            height: 28px;
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
             cursor: pointer;
-            font-size: 18px;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        .swf-sidebar-content {
-            flex: 1;
+        .swf-panel-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        .swf-panel-body {
+            max-height: 350px;
             overflow-y: auto;
-            padding: 0;
+        }
+        .swf-panel-progress {
+            padding: 10px 14px;
+            background: #f8f8f8;
+            border-bottom: 1px solid #eee;
+        }
+        .swf-progress-bar {
+            height: 4px;
+            background: #e0e0e0;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .swf-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4caf50, #2e7d32);
+            transition: width 0.3s;
+        }
+        .swf-progress-text {
+            font-size: 11px;
+            color: #888;
+            margin-top: 4px;
+            text-align: center;
+        }
+
+        /* Element-Tooltip */
+        .swf-tooltip {
+            position: fixed;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.15);
+            max-width: 300px;
+            z-index: 2147483647;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            animation: swf-fade-in 0.2s ease;
+        }
+        @keyframes swf-fade-in {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .swf-tooltip-arrow {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #fff;
+            transform: rotate(45deg);
+            box-shadow: -2px -2px 4px rgba(0,0,0,0.05);
+        }
+        .swf-tooltip-arrow.top { bottom: -5px; left: 20px; }
+        .swf-tooltip-arrow.bottom { top: -5px; left: 20px; box-shadow: 2px 2px 4px rgba(0,0,0,0.05); }
+        .swf-tooltip-content {
+            padding: 14px;
+        }
+        .swf-tooltip-step {
+            font-size: 11px;
+            color: #2e7d32;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .swf-tooltip-text {
+            font-size: 14px;
+            line-height: 1.4;
+            color: #333;
+            margin-bottom: 12px;
+        }
+        .swf-tooltip-buttons {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
         }
         .swf-step-list {
             list-style: none;
@@ -766,108 +854,68 @@ function injectStyles() {
             padding: 0;
         }
         .swf-step-item {
-            padding: 12px 16px;
-            border-bottom: 1px solid #eee;
+            padding: 8px 14px;
+            border-bottom: 1px solid #f0f0f0;
             cursor: pointer;
-            transition: background 0.2s;
             display: flex;
-            align-items: flex-start;
-            gap: 12px;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            transition: background 0.2s;
         }
-        .swf-step-item:hover {
-            background: #f5f5f5;
-        }
-        .swf-step-item.completed {
-            background: #e8f5e9;
-        }
-        .swf-step-item.current {
-            background: #fff3e0;
-            border-left: 4px solid #f57c00;
-        }
-        .swf-step-item.skipped {
-            opacity: 0.5;
-        }
-        .swf-step-number {
-            width: 24px;
-            height: 24px;
+        .swf-step-item:hover { background: #fafafa; }
+        .swf-step-item.completed { background: #e8f5e9; }
+        .swf-step-item.current { background: #fff3e0; border-left: 3px solid #f57c00; }
+        .swf-step-item.skipped { opacity: 0.5; }
+        .swf-step-num {
+            width: 20px;
+            height: 20px;
             border-radius: 50%;
             background: #e0e0e0;
             color: #666;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
+            font-size: 10px;
             font-weight: 600;
             flex-shrink: 0;
         }
-        .swf-step-item.completed .swf-step-number {
-            background: #4caf50;
-            color: #fff;
-        }
-        .swf-step-item.current .swf-step-number {
-            background: #f57c00;
-            color: #fff;
-        }
+        .swf-step-item.completed .swf-step-num { background: #4caf50; color: #fff; }
+        .swf-step-item.current .swf-step-num { background: #f57c00; color: #fff; }
         .swf-step-text {
             flex: 1;
-            font-size: 13px;
-            line-height: 1.4;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
-        .swf-step-text small {
-            display: block;
-            color: #999;
-            font-size: 11px;
-            margin-top: 4px;
-        }
-        .swf-current-step {
-            padding: 20px;
-            background: #fff8e1;
-            border-bottom: 2px solid #f57c00;
-        }
-        .swf-current-step h3 {
-            margin: 0 0 8px 0;
-            color: #e65100;
-            font-size: 14px;
-        }
-        .swf-current-step p {
-            margin: 0 0 16px 0;
-            font-size: 15px;
-            line-height: 1.5;
-            color: #333;
-        }
-        .swf-btn-row {
-            display: flex;
-            gap: 8px;
-        }
+
+        /* Buttons */
         .swf-btn {
-            padding: 10px 16px;
+            padding: 8px 12px;
             border: none;
             border-radius: 6px;
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 500;
             cursor: pointer;
-            flex: 1;
         }
-        .swf-btn-primary {
-            background: #2e7d32;
-            color: #fff;
-        }
-        .swf-btn-secondary {
-            background: #f5f5f5;
-            color: #333;
-        }
+        .swf-btn-primary { background: #2e7d32; color: #fff; }
+        .swf-btn-primary:hover { background: #1b5e20; }
+        .swf-btn-secondary { background: #f0f0f0; color: #333; }
+        .swf-btn-secondary:hover { background: #e0e0e0; }
+
+        /* Highlight-Ring um Element */
         .swf-highlight {
-            position: absolute;
+            position: fixed;
             border: 3px solid #2e7d32;
-            border-radius: 4px;
-            box-shadow: 0 0 0 4px rgba(46,125,50,0.3), 0 0 20px rgba(46,125,50,0.5);
+            border-radius: 6px;
             pointer-events: none;
             z-index: 2147483645;
-            animation: swf-pulse 2s infinite;
+            box-shadow: 0 0 0 3px rgba(46,125,50,0.2);
+            animation: swf-ring-pulse 1.5s ease-in-out infinite;
         }
-        @keyframes swf-pulse {
-            0%, 100% { box-shadow: 0 0 0 4px rgba(46,125,50,0.3), 0 0 20px rgba(46,125,50,0.5); }
-            50% { box-shadow: 0 0 0 8px rgba(46,125,50,0.2), 0 0 30px rgba(46,125,50,0.4); }
+        @keyframes swf-ring-pulse {
+            0%, 100% { box-shadow: 0 0 0 3px rgba(46,125,50,0.2); }
+            50% { box-shadow: 0 0 0 6px rgba(46,125,50,0.15), 0 0 15px rgba(46,125,50,0.2); }
         }
         .swf-welcome-overlay {
             position: fixed;
@@ -901,23 +949,14 @@ function injectStyles() {
             background: #fff3e0;
             border: 2px solid #f57c00;
             border-radius: 8px;
-            padding: 16px;
-            margin: 16px;
+            padding: 12px;
+            margin: 10px;
+            font-size: 12px;
         }
         .swf-not-found-panel h4 {
             color: #e65100;
-            margin: 0 0 8px 0;
-        }
-        .swf-match-info {
-            background: #e3f2fd;
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            color: #1565c0;
-            margin-top: 12px;
-        }
-        body.swf-active {
-            margin-right: 320px !important;
+            margin: 0 0 6px 0;
+            font-size: 13px;
         }
     \`;
     document.head.appendChild(st);
@@ -927,28 +966,203 @@ function injectStyles() {
 // UI KOMPONENTEN
 // ==========================================
 
-var sidebar = null;
+var panel = null;
 var highlight = null;
+var spotlight = null;
+var tooltip = null;
+var panelMinimized = false;
+var panelDragOffset = { x: 0, y: 0 };
 
-function createSidebar() {
-    if (sidebar) return;
+// Spotlight-Overlay erstellen (dunkelt Seite ab, lässt Element frei)
+function createSpotlight(el) {
+    removeSpotlight();
+    if (!el) return;
 
-    document.body.classList.add("swf-active");
+    var rect = el.getBoundingClientRect();
+    var padding = 8;
 
-    sidebar = $c("div", { className: "swf-sidebar", id: "swf-sidebar" });
+    spotlight = $c("div", { id: "swf-spotlight" });
+    spotlight.style.cssText = "position:fixed;top:0;left:0;width:100%;height:100%;z-index:2147483640;pointer-events:none;";
 
-    var header = '<div class="swf-sidebar-header">' +
-        '<span class="swf-sidebar-title">🌱 ' + d.n + '</span>' +
-        '<button class="swf-sidebar-close" id="swf-close-sidebar">×</button>' +
+    // SVG mit Ausschnitt für das Element
+    var svgNS = "http://www.w3.org/2000/svg";
+    var svg = document.createElementNS(svgNS, "svg");
+    svg.setAttribute("width", "100%");
+    svg.setAttribute("height", "100%");
+    svg.style.cssText = "position:absolute;top:0;left:0;";
+
+    var defs = document.createElementNS(svgNS, "defs");
+    var mask = document.createElementNS(svgNS, "mask");
+    mask.setAttribute("id", "swf-spotlight-mask");
+
+    // Weißer Hintergrund (sichtbar)
+    var bgRect = document.createElementNS(svgNS, "rect");
+    bgRect.setAttribute("width", "100%");
+    bgRect.setAttribute("height", "100%");
+    bgRect.setAttribute("fill", "white");
+
+    // Schwarzes Loch für Element (transparent)
+    var hole = document.createElementNS(svgNS, "rect");
+    hole.setAttribute("x", rect.left - padding);
+    hole.setAttribute("y", rect.top - padding);
+    hole.setAttribute("width", rect.width + padding * 2);
+    hole.setAttribute("height", rect.height + padding * 2);
+    hole.setAttribute("rx", "8");
+    hole.setAttribute("fill", "black");
+
+    mask.appendChild(bgRect);
+    mask.appendChild(hole);
+    defs.appendChild(mask);
+    svg.appendChild(defs);
+
+    // Dunkles Overlay mit Maske
+    var overlay = document.createElementNS(svgNS, "rect");
+    overlay.setAttribute("width", "100%");
+    overlay.setAttribute("height", "100%");
+    overlay.setAttribute("fill", "rgba(0,0,0,0.6)");
+    overlay.setAttribute("mask", "url(#swf-spotlight-mask)");
+    svg.appendChild(overlay);
+
+    spotlight.appendChild(svg);
+    document.body.appendChild(spotlight);
+
+    // Position bei Scroll aktualisieren
+    spotlight._updatePosition = function() {
+        var newRect = el.getBoundingClientRect();
+        hole.setAttribute("x", newRect.left - padding);
+        hole.setAttribute("y", newRect.top - padding);
+        hole.setAttribute("width", newRect.width + padding * 2);
+        hole.setAttribute("height", newRect.height + padding * 2);
+    };
+
+    window.addEventListener("scroll", spotlight._updatePosition, true);
+    window.addEventListener("resize", spotlight._updatePosition);
+}
+
+function removeSpotlight() {
+    if (spotlight) {
+        window.removeEventListener("scroll", spotlight._updatePosition, true);
+        window.removeEventListener("resize", spotlight._updatePosition);
+        spotlight.remove();
+        spotlight = null;
+    }
+}
+
+// Tooltip beim Element anzeigen
+function createTooltip(el, step, idx) {
+    removeTooltip();
+    if (!el) return;
+
+    var rect = el.getBoundingClientRect();
+
+    tooltip = $c("div", { className: "swf-tooltip", id: "swf-tooltip" });
+
+    // Position berechnen (über oder unter dem Element)
+    var showAbove = rect.top > 200;
+    var top = showAbove ? rect.top - 10 : rect.bottom + 10;
+    var left = Math.max(10, Math.min(rect.left, window.innerWidth - 340));
+
+    tooltip.innerHTML =
+        '<div class="swf-tooltip-arrow ' + (showAbove ? 'top' : 'bottom') + '"></div>' +
+        '<div class="swf-tooltip-content">' +
+        '<div class="swf-tooltip-step">Schritt ' + (idx + 1) + ' von ' + d.s.length + '</div>' +
+        '<div class="swf-tooltip-text">' + step.d + '</div>' +
+        '<div class="swf-tooltip-buttons">' +
+        (idx > 0 ? '<button class="swf-btn swf-btn-secondary" id="swf-tip-prev">← Zurück</button>' : '') +
+        '<button class="swf-btn swf-btn-secondary" id="swf-tip-skip">Überspringen</button>' +
+        '<button class="swf-btn swf-btn-primary" id="swf-tip-done">✓ Erledigt</button>' +
+        '</div></div>';
+
+    tooltip.style.cssText = "position:fixed;top:" + (showAbove ? "auto" : top + "px") + ";bottom:" + (showAbove ? (window.innerHeight - rect.top + 10) + "px" : "auto") + ";left:" + left + "px;";
+
+    document.body.appendChild(tooltip);
+
+    if ($("#swf-tip-prev")) {
+        $("#swf-tip-prev").addEventListener("click", function() { goToStep(idx - 1); });
+    }
+    $("#swf-tip-skip").addEventListener("click", function() { goToStep(idx + 1); });
+    $("#swf-tip-done").addEventListener("click", function() {
+        if (!completedSteps.includes(idx)) completedSteps.push(idx);
+        goToStep(idx + 1);
+    });
+}
+
+function removeTooltip() {
+    if (tooltip) {
+        tooltip.remove();
+        tooltip = null;
+    }
+}
+
+// Panel verschiebbar machen
+function makePanelDraggable(panelEl) {
+    var header = panelEl.querySelector(".swf-panel-header");
+    if (!header) return;
+
+    var isDragging = false;
+
+    header.addEventListener("mousedown", function(e) {
+        if (e.target.tagName === "BUTTON") return;
+        isDragging = true;
+        panelDragOffset.x = e.clientX - panelEl.offsetLeft;
+        panelDragOffset.y = e.clientY - panelEl.offsetTop;
+        header.style.cursor = "grabbing";
+    });
+
+    document.addEventListener("mousemove", function(e) {
+        if (!isDragging) return;
+        var x = e.clientX - panelDragOffset.x;
+        var y = e.clientY - panelDragOffset.y;
+        // Grenzen einhalten
+        x = Math.max(0, Math.min(x, window.innerWidth - panelEl.offsetWidth));
+        y = Math.max(0, Math.min(y, window.innerHeight - panelEl.offsetHeight));
+        panelEl.style.left = x + "px";
+        panelEl.style.right = "auto";
+        panelEl.style.top = y + "px";
+    });
+
+    document.addEventListener("mouseup", function() {
+        isDragging = false;
+        header.style.cursor = "move";
+    });
+}
+
+function createPanel() {
+    if (panel) return;
+
+    panel = $c("div", { className: "swf-panel", id: "swf-panel" });
+
+    var progressPercent = Math.round((completedSteps.length / d.s.length) * 100);
+
+    panel.innerHTML =
+        '<div class="swf-panel-header">' +
+        '<span class="swf-panel-title">🌱 ' + d.n + '</span>' +
+        '<div class="swf-panel-buttons">' +
+        '<button class="swf-panel-btn" id="swf-minimize" title="Minimieren">−</button>' +
+        '<button class="swf-panel-btn" id="swf-close-panel" title="Beenden">×</button>' +
+        '</div></div>' +
+        '<div class="swf-panel-body">' +
+        '<div class="swf-panel-progress">' +
+        '<div class="swf-progress-bar"><div class="swf-progress-fill" style="width:' + progressPercent + '%"></div></div>' +
+        '<div class="swf-progress-text">' + completedSteps.length + ' von ' + d.s.length + ' erledigt</div>' +
+        '</div>' +
+        '<ul class="swf-step-list" id="swf-step-list"></ul>' +
         '</div>';
 
-    sidebar.innerHTML = header +
-        '<div id="swf-current-step-container"></div>' +
-        '<div class="swf-sidebar-content"><ul class="swf-step-list" id="swf-step-list"></ul></div>';
+    document.body.appendChild(panel);
 
-    document.body.appendChild(sidebar);
+    // Verschiebbar machen
+    makePanelDraggable(panel);
 
-    $("#swf-close-sidebar").addEventListener("click", function() {
+    // Minimieren
+    $("#swf-minimize").addEventListener("click", function() {
+        panelMinimized = !panelMinimized;
+        panel.classList.toggle("minimized", panelMinimized);
+        this.textContent = panelMinimized ? "+" : "−";
+    });
+
+    // Schließen
+    $("#swf-close-panel").addEventListener("click", function() {
         if (confirm("Tutorial beenden?")) {
             cleanup();
         }
@@ -961,6 +1175,13 @@ function updateStepList() {
     var list = $("#swf-step-list");
     if (!list) return;
 
+    // Fortschrittsbalken aktualisieren
+    var progressPercent = Math.round((completedSteps.length / d.s.length) * 100);
+    var progressFill = $(".swf-progress-fill");
+    var progressText = $(".swf-progress-text");
+    if (progressFill) progressFill.style.width = progressPercent + "%";
+    if (progressText) progressText.textContent = completedSteps.length + " von " + d.s.length + " erledigt";
+
     list.innerHTML = d.s.map(function(step, idx) {
         var status = "";
         if (completedSteps.includes(idx)) status = "completed";
@@ -968,12 +1189,11 @@ function updateStepList() {
         else if (idx < currentStep && !completedSteps.includes(idx)) status = "skipped";
 
         var number = completedSteps.includes(idx) ? "✓" : (idx + 1);
+        var shortDesc = step.d.length > 40 ? step.d.substring(0, 40) + "..." : step.d;
 
         return '<li class="swf-step-item ' + status + '" data-step="' + idx + '">' +
-            '<span class="swf-step-number">' + number + '</span>' +
-            '<span class="swf-step-text">' + step.d +
-            (step.o ? '<small>Optional</small>' : '') +
-            '</span></li>';
+            '<span class="swf-step-num">' + number + '</span>' +
+            '<span class="swf-step-text" title="' + step.d.replace(/"/g, '&quot;') + '">' + shortDesc + '</span></li>';
     }).join("");
 
     // Klick-Handler für Schritte
@@ -1037,12 +1257,15 @@ function updateCurrentStepPanel(step, idx, elementFound, matchStrategy) {
     });
 }
 
-function showHighlight(el, stepIdx) {
+function showHighlight(el, stepIdx, step) {
     removeHighlight();
 
     el.scrollIntoView({ behavior: "smooth", block: "center" });
 
-    // Highlight erstellen und Position kontinuierlich aktualisieren
+    // Spotlight-Overlay erstellen (dunkelt Seite ab)
+    createSpotlight(el);
+
+    // Highlight-Ring um Element
     highlight = $c("div", { className: "swf-highlight", id: "swf-highlight" });
     document.body.appendChild(highlight);
 
@@ -1050,17 +1273,27 @@ function showHighlight(el, stepIdx) {
         if (!highlight || !document.body.contains(highlight)) return;
         var r = el.getBoundingClientRect();
         highlight.style.cssText = "position:fixed;top:" + (r.top - 5) + "px;left:" + (r.left - 5) + "px;width:" + (r.width + 10) + "px;height:" + (r.height + 10) + "px";
+        // Spotlight auch aktualisieren
+        if (spotlight && spotlight._updatePosition) {
+            spotlight._updatePosition();
+        }
     }
 
-    // Sofort positionieren
-    updatePosition();
+    // Nach kurzem Delay positionieren (wegen smooth scroll)
+    window.setTimeout(function() {
+        updatePosition();
+        // Tooltip beim Element anzeigen
+        if (step) {
+            createTooltip(el, step, stepIdx);
+        }
+    }, 400);
 
     // Während des Scrollens aktualisieren
     var scrollCount = 0;
     var scrollInterval = window.setInterval(function() {
         updatePosition();
         scrollCount++;
-        if (scrollCount > 20) { // Nach ~1 Sekunde aufhören
+        if (scrollCount > 20) {
             window.clearInterval(scrollInterval);
         }
     }, 50);
@@ -1072,15 +1305,12 @@ function showHighlight(el, stepIdx) {
 
     // AUTO-WEITER: Bei Klick auf das Element automatisch zum nächsten Schritt
     var onClick = function(e) {
-        // Schritt als erledigt markieren
         if (stepIdx !== undefined && !completedSteps.includes(stepIdx)) {
             completedSteps.push(stepIdx);
         }
-        // Kurz warten, dann zum nächsten Schritt (damit die Aktion ausgeführt werden kann)
         window.setTimeout(function() {
             goToStep(currentStep + 1);
         }, 100);
-        // Klick NICHT blockieren - Aktion wird normal ausgeführt
     };
     el.addEventListener("click", onClick, true);
 
@@ -1090,6 +1320,8 @@ function showHighlight(el, stepIdx) {
         window.removeEventListener("scroll", onScroll, true);
         window.removeEventListener("resize", onScroll);
         el.removeEventListener("click", onClick, true);
+        removeSpotlight();
+        removeTooltip();
     };
 }
 
@@ -1127,7 +1359,7 @@ function showWelcome() {
 
     $("#swf-start").addEventListener("click", function() {
         overlay.remove();
-        createSidebar();
+        createPanel();
         goToStep(currentStep);
     });
 }
@@ -1180,7 +1412,7 @@ function goToStep(idx) {
     // Element suchen
     waitForElement(step, function(el, strategy) {
         if (el) {
-            showHighlight(el, idx);
+            showHighlight(el, idx, step);
             updateCurrentStepPanel(step, idx, true, strategy);
         } else {
             updateCurrentStepPanel(step, idx, false, null);
@@ -1194,7 +1426,7 @@ function goToStep(idx) {
 
 // Warnung vor Seitenwechsel
 window.addEventListener("beforeunload", function(e) {
-    if (sidebar && currentStep < d.s.length) {
+    if (panel && currentStep < d.s.length) {
         saveState();
         // Hinweis kann nicht customized werden in modernen Browsern,
         // aber der State ist gespeichert
@@ -1203,7 +1435,7 @@ window.addEventListener("beforeunload", function(e) {
 
 // Bei Klick auf Links: Hinweis zeigen
 document.addEventListener("click", function(e) {
-    if (!sidebar) return;
+    if (!panel) return;
 
     var link = e.target.closest("a[href]");
     if (!link) return;
@@ -1235,9 +1467,9 @@ document.addEventListener("click", function(e) {
 
 function cleanup() {
     removeHighlight();
-    if (sidebar) {
-        sidebar.remove();
-        sidebar = null;
+    if (panel) {
+        panel.remove();
+        panel = null;
     }
     document.body.classList.remove("swf-active");
     var welcome = $("#swf-welcome");
@@ -1252,7 +1484,7 @@ function cleanup() {
 // ==========================================
 
 // Prüfen ob schon aktiv
-if (document.getElementById("swf-sidebar")) {
+if (document.getElementById("swf-panel")) {
     // Sidebar existiert schon - nichts tun
     return;
 }

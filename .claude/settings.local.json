@@ -22,7 +22,12 @@
       "Bash(git init:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(git config:*)"
+      "Bash(git config:*)",
+      "Bash(\"/c/Program Files/GitHub CLI/gh.exe\" repo create tutorial-werkstatt --public --description \"Interaktive Anleitungen für Web-Anwendungen erstellen und abspielen\" --source . --push)",
+      "Bash(\"/c/Program Files/GitHub CLI/gh.exe\" repo edit otisbenning/tutorial-werkstatt --enable-pages)",
+      "Bash(\"/c/Program Files/GitHub CLI/gh.exe\" api repos/otisbenning/tutorial-werkstatt/pages -X POST -f build_type=workflow -f source[branch]=master -f source[path]=/)",
+      "Bash(\"/c/Program Files/GitHub CLI/gh.exe\" api repos/otisbenning/tutorial-werkstatt/pages --jq '.html_url')",
+      "Bash(git push)"
     ]
   }
 }
