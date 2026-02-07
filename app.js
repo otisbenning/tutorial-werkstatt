@@ -573,13 +573,50 @@ function scanPage() {
     return elements;
 }
 
-// Sichtbarkeit prüfen
+// Sichtbarkeit prüfen (inkl. Overlay-Erkennung)
 function isVisible(el) {
     if (!el) return false;
+
+    // Basis-Checks
     var st = window.getComputedStyle(el);
     if (st.display === "none" || st.visibility === "hidden" || st.opacity === "0") return false;
+
     var r = el.getBoundingClientRect();
-    return r.width > 0 && r.height > 0;
+    if (r.width <= 0 || r.height <= 0) return false;
+
+    // Prüfen ob Element oder Parent aria-hidden ist
+    if (el.closest("[aria-hidden='true']")) return false;
+
+    // Prüfen ob Element im sichtbaren Viewport ist
+    if (r.bottom < 0 || r.top > window.innerHeight ||
+        r.right < 0 || r.left > window.innerWidth) return false;
+
+    // OVERLAY-ERKENNUNG: Prüfen ob Element tatsächlich erreichbar ist
+    // Wir testen mehrere Punkte im Element
+    var points = [
+        { x: r.left + r.width / 2, y: r.top + r.height / 2 },  // Mitte
+        { x: r.left + 5, y: r.top + 5 },                        // Oben-Links
+        { x: r.right - 5, y: r.top + 5 },                       // Oben-Rechts
+        { x: r.left + 5, y: r.bottom - 5 },                     // Unten-Links
+        { x: r.right - 5, y: r.bottom - 5 }                     // Unten-Rechts
+    ];
+
+    for (var i = 0; i < points.length; i++) {
+        var p = points[i];
+        // Punkt muss im Viewport sein
+        if (p.x < 0 || p.x > window.innerWidth || p.y < 0 || p.y > window.innerHeight) continue;
+
+        var topEl = document.elementFromPoint(p.x, p.y);
+        if (topEl) {
+            // Prüfen ob das gefundene Element unser Element ist oder darin enthalten
+            if (topEl === el || el.contains(topEl) || topEl.contains(el)) {
+                return true; // Element ist erreichbar!
+            }
+        }
+    }
+
+    // Keiner der Punkte war erreichbar - Element ist verdeckt
+    return false;
 }
 
 // Wörter aus Text extrahieren (für Fuzzy-Matching)
