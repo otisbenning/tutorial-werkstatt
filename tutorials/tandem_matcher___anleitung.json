@@ -1,0 +1,232 @@
+{
+  "id": "tutorial_1770464717526",
+  "name": "Tandem-Matcher - Anleitung",
+  "description": "Erstellt am 7.2.2026",
+  "startUrl": "https://otisbenning.github.io/tandem-matcher/",
+  "steps": [
+    {
+      "type": "click",
+      "trigger": "SwaF Sammler (Batch)",
+      "description": "Klicke auf \"SwaF Sammler (Batch)\"",
+      "url": "https://otisbenning.github.io/tandem-matcher/",
+      "isEntryPoint": true
+    },
+    {
+      "type": "click",
+      "trigger": "📋 Aus Zwischenablage einfügen",
+      "description": "Klicke auf \"📋 Aus Zwischenablage einfügen\"",
+      "url": "https://otisbenning.github.io/tandem-matcher/",
+      "isEntryPoint": false
+    },
+    {
+      "type": "click",
+      "trigger": "➡️ Weiter zum Matching ( Profile)",
+      "description": "Klicke auf \"➡️ Weiter zum Matching ( Profile)\"",
+      "url": "https://otisbenning.github.io/tandem-matcher/",
+      "isEntryPoint": false
+    },
+    {
+      "type": "click",
+      "trigger": "📋 Listenansicht",
+      "description": "Klicke auf \"📋 Listenansicht\"",
+      "url": "https://otisbenning.github.io/tandem-matcher/",
+      "isEntryPoint": false
+    },
+    {
+      "type": "click",
+      "trigger": "🗺️ Kartenansicht",
+      "description": "Klicke auf \"🗺️ Kartenansicht\"",
+      "url": "https://otisbenning.github.io/tandem-matcher/",
+      "isEntryPoint": false
+    },
+    {
+      "type": "click",
+      "trigger": "🖥️ Full-Screen Karte",
+      "description": "Klicke auf \"🖥️ Full-Screen Karte\"",
+      "url": "https://otisbenning.github.io/tandem-matcher/",
+      "isEntryPoint": false
+    },
+    {
+      "type": "click",
+      "trigger": "H",
+      "description": "Klicke auf \"H\"",
+      "url": "https://otisbenning.github.io/tandem-matcher/",
+      "isEntryPoint": false
+    },
+    {
+      "type": "click",
+      "trigger": "📋 Alle Felder anzeigen",
+      "description": "Klicke auf \"📋 Alle Felder anzeigen\"",
+      "url": "https://otisbenning.github.io/tandem-matcher/",
+      "isEntryPoint": false
+    },
+    {
+      "type": "click",
+      "trigger": "Auswählen",
+      "description": "Klicke auf \"Auswählen\"",
+      "url": "https://otisbenning.github.io/tandem-matcher/",
+      "isEntryPoint": false
+    },
+    {
+      "type": "click",
+      "trigger": "N",
+      "description": "Klicke auf \"N\"",
+      "url": "https://otisbenning.github.io/tandem-matcher/",
+      "isEntryPoint": false
+    },
+    {
+      "type": "click",
+      "trigger": "Auswählen",
+      "description": "Klicke auf \"Auswählen\"",
+      "url": "https://otisbenning.github.io/tandem-matcher/",
+      "isEntryPoint": false
+    },
+    {
+      "type": "click",
+      "trigger": "✨ Tandem erstellen",
+      "description": "Klicke auf \"✨ Tandem erstellen\"",
+      "url": "https://otisbenning.github.io/tandem-matcher/",
+      "isEntryPoint": false
+    },
+    {
+      "type": "click",
+      "trigger": "H",
+      "description": "Klicke auf \"H\"",
+      "url": "https://otisbenning.github.io/tandem-matcher/",
+      "isEntryPoint": false
+    },
+    {
+      "type": "click",
+      "trigger": "🗑️ Tandem auflösen",
+      "description": "Klicke auf \"🗑️ Tandem auflösen\"",
+      "url": "https://otisbenning.github.io/tandem-matcher/",
+      "isEntryPoint": false
+    },
+    {
+      "type": "click",
+      "trigger": "✕ Schließen",
+      "description": "Klicke auf \"✕ Schließen\"",
+      "url": "https://otisbenning.github.io/tandem-matcher/",
+      "isEntryPoint": false
+    },
+    {
+      "type": "click",
+      "trigger": "3. Felder auswählen",
+      "description": "Klicke auf \"3. Felder auswählen\"",
+      "url": "https://otisbenning.github.io/tandem-matcher/",
+      "isEntryPoint": false
+    },
+    {
+      "type": "click",
+      "trigger": "4. Bearbeitung",
+      "description": "Klicke auf \"4. Bearbeitung\"",
+      "url": "https://otisbenning.github.io/tandem-matcher/",
+      "isEntryPoint": false
+    },
+    {
+      "type": "click",
+      "trigger": "-- Tandem auswählen --Hubert & MaksymBaraa & Stefa",
+      "description": "Klicke auf \"-- Tandem auswählen --Hubert & MaksymBaraa & Stefa\"",
+      "url": "https://otisbenning.github.io/tandem-matcher/",
+      "isEntryPoint": false
+    },
+    {
+      "type": "click",
+      "trigger": "-- Tandem auswählen --Hubert & MaksymBaraa & Stefa",
+      "description": "Klicke auf \"-- Tandem auswählen --Hubert & MaksymBaraa & Stefa\"",
+      "url": "https://otisbenning.github.io/tandem-matcher/",
+      "isEntryPoint": false
+    },
+    {
+      "type": "click",
+      "trigger": "🤖 KI",
+      "description": "Klicke auf \"🤖 KI\"",
+      "url": "https://otisbenning.github.io/tandem-matcher/",
+      "isEntryPoint": false
+    },
+    {
+      "type": "click",
+      "trigger": "📋 Prompt kopieren",
+      "description": "Klicke auf \"📋 Prompt kopieren\"",
+      "url": "https://otisbenning.github.io/tandem-matcher/",
+      "isEntryPoint": false
+    },
+    {
+      "type": "click",
+      "trigger": "💬 ChatGPT öffnen",
+      "description": "Klicke auf \"💬 ChatGPT öffnen\"",
+      "url": "https://otisbenning.github.io/tandem-matcher/",
+      "isEntryPoint": false
+    },
+    {
+      "type": "click",
+      "trigger": "🧠 Intelligente Vorschläge generieren",
+      "description": "Klicke auf \"🧠 Intelligente Vorschläge generieren\"",
+      "url": "https://otisbenning.github.io/tandem-matcher/",
+      "isEntryPoint": false
+    },
+    {
+      "type": "click",
+      "trigger": "💾 Tandem speichern",
+      "description": "Klicke auf \"💾 Tandem speichern\"",
+      "url": "https://otisbenning.github.io/tandem-matcher/",
+      "isEntryPoint": false
+    },
+    {
+      "type": "click",
+      "trigger": "📧 Komplette E-Mail erstellen",
+      "description": "Klicke auf \"📧 Komplette E-Mail erstellen\"",
+      "url": "https://otisbenning.github.io/tandem-matcher/",
+      "isEntryPoint": false
+    },
+    {
+      "type": "click",
+      "trigger": "📋 Komplette E-Mail kopieren",
+      "description": "Klicke auf \"📋 Komplette E-Mail kopieren\"",
+      "url": "https://otisbenning.github.io/tandem-matcher/",
+      "isEntryPoint": false
+    },
+    {
+      "type": "click",
+      "trigger": "5. Verwaltung",
+      "description": "Klicke auf \"5. Verwaltung\"",
+      "url": "https://otisbenning.github.io/tandem-matcher/",
+      "isEntryPoint": false
+    },
+    {
+      "type": "click",
+      "trigger": "🗑️ Profile löschen",
+      "description": "Klicke auf \"🗑️ Profile löschen\"",
+      "url": "https://otisbenning.github.io/tandem-matcher/",
+      "isEntryPoint": false
+    },
+    {
+      "type": "click",
+      "trigger": "🗑️ Tandems löschen",
+      "description": "Klicke auf \"🗑️ Tandems löschen\"",
+      "url": "https://otisbenning.github.io/tandem-matcher/",
+      "isEntryPoint": false
+    },
+    {
+      "type": "click",
+      "trigger": "📥 Daten wiederherstellen",
+      "description": "Klicke auf \"📥 Daten wiederherstellen\"",
+      "url": "https://otisbenning.github.io/tandem-matcher/",
+      "isEntryPoint": false
+    },
+    {
+      "type": "click",
+      "trigger": "",
+      "description": "Klicke auf das Element",
+      "url": "https://otisbenning.github.io/tandem-matcher/",
+      "isEntryPoint": false
+    },
+    {
+      "type": "click",
+      "trigger": "🔄 Tandems laden",
+      "description": "Klicke auf \"🔄 Tandems laden\"",
+      "url": "https://otisbenning.github.io/tandem-matcher/",
+      "isEntryPoint": false
+    }
+  ]
+}
