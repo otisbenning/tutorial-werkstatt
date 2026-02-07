@@ -4,5 +4,11 @@
     "name": "GitHub Repository erstellen",
     "description": "Lerne Schritt für Schritt, wie du ein neues Repository auf GitHub erstellst und deinen ersten Commit machst.",
     "category": "GitHub"
+  },
+  {
+    "file": "tutorials/tandem_matcher___anleitung.json",
+    "name": "Tandem-Matcher - Anleitung",
+    "description": "Anleitung für den SwaF Sammler (Batch)",
+    "category": "Start with a Friend"
   }
 ]
