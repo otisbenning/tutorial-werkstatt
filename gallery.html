@@ -426,16 +426,16 @@
         // ==========================================
 
         function generatePlayerCode(tutorial) {
+            // Neues Datenformat mit Trigger-Feld
             var tutorialData = {
                 n: tutorial.name,
                 d: tutorial.description,
                 u: tutorial.startUrl,
-                s: tutorial.steps.map(function(s) {
-                    var step = {
+                s: (tutorial.steps || []).map(function(s) {
+                    return {
                         t: s.type,
                         d: s.description,
-                        c: s.selector,
-                        x: s.xpath,
+                        tr: s.trigger || s.description,  // Trigger für Element-Suche
                         u: s.url,
                         p: s.urlPattern,
                         o: s.optional,
@@ -443,55 +443,84 @@
                         v: s.exampleValue,
                         i: s.instruction
                     };
-                    if (s.ariaLabel) step.al = s.ariaLabel;
-                    if (s.placeholder) step.ph = s.placeholder;
-                    if (s.name) step.nm = s.name;
-                    if (s.href) step.hr = s.href;
-                    if (s.role) step.rl = s.role;
-                    if (s.title) step.ti = s.title;
-                    if (s.text) step.tx = s.text;
-                    if (s.tagName) step.tn = s.tagName;
-                    if (s.inputType) step.it = s.inputType;
-                    if (s.forAttr) step.fa = s.forAttr;
-                    if (s.label) step.lb = s.label;
-                    return step;
                 })
             };
 
             var playerScript = '(function(){' +
                 'var d=' + JSON.stringify(tutorialData).replace(/'/g, "\\'") + ';' +
                 'var s=0;' +
-                'var p=new URLSearchParams(location.search);' +
-                'if(p.has("_swf_step"))s=parseInt(p.get("_swf_step"));' +
 
                 'function $(q){try{return document.querySelector(q)}catch(e){return null}}' +
+                'function $$(q){try{return document.querySelectorAll(q)}catch(e){return[]}}' +
                 'function $c(t,a){var e=document.createElement(t);if(a)Object.keys(a).forEach(function(k){e[k]=a[k]});return e}' +
 
+                // Accessible Name berechnen
+                'function getAccName(el){' +
+                'if(!el||el.nodeType!==1)return"";' +
+                'var aria=el.getAttribute("aria-label");if(aria)return aria.trim();' +
+                'var tag=el.tagName;' +
+                'if(tag==="INPUT"||tag==="SELECT"||tag==="TEXTAREA"){' +
+                'if(el.id){var lbl=$("label[for=\\""+el.id+"\\"]");if(lbl)return lbl.textContent.trim()}' +
+                'if(el.placeholder)return el.placeholder.trim();' +
+                'if(el.name)return el.name}' +
+                'if(tag==="BUTTON")return el.textContent.trim()||el.value||"";' +
+                'if(tag==="A")return el.textContent.trim()||el.getAttribute("title")||"";' +
+                'return el.textContent.trim().substring(0,80)}' +
+
+                // Sichtbarkeit prüfen mit Overlay-Erkennung
+                'function isVisible(el){' +
+                'if(!el)return false;' +
+                'var st=window.getComputedStyle(el);' +
+                'if(st.display==="none"||st.visibility==="hidden"||st.opacity==="0")return false;' +
+                'var r=el.getBoundingClientRect();' +
+                'if(r.width<=0||r.height<=0)return false;' +
+                'if(el.closest("[aria-hidden=\\"true\\"]"))return false;' +
+                'var cx=r.left+r.width/2,cy=r.top+r.height/2;' +
+                'if(cx<0||cx>window.innerWidth||cy<0||cy>window.innerHeight)return false;' +
+                'var top=document.elementFromPoint(cx,cy);' +
+                'return top&&(top===el||el.contains(top)||top.contains(el))}' +
+
+                // Seite scannen
+                'function scanPage(){' +
+                'var els=[];' +
+                '$$("button,a[href],input:not([type=hidden]),select,textarea,[role=button],[role=link],[onclick],.btn").forEach(function(el){' +
+                'if(!isVisible(el))return;' +
+                'var name=getAccName(el);' +
+                'els.push({el:el,name:name,nameLower:name.toLowerCase()})});' +
+                'return els}' +
+
+                // Wörter extrahieren
+                'function extractWords(t){return t.toLowerCase().replace(/[^a-z0-9 ]/gi," ").split(" ").filter(function(w){return w.length>2})}' +
+
+                // Score berechnen
+                'function calcScore(search,searchWords,item){' +
+                'var score=0;' +
+                'if(item.nameLower===search)return 1000;' +
+                'if(item.nameLower.indexOf(search)!==-1){score+=100;score+=Math.round(search.length/item.nameLower.length*50)}' +
+                'if(searchWords.length>0){' +
+                'var matched=0;' +
+                'searchWords.forEach(function(w){if(item.nameLower.indexOf(w)!==-1){matched++;score+=w.length}});' +
+                'score+=Math.round(matched/searchWords.length*80);' +
+                'if(matched===searchWords.length)score+=50}' +
+                'return score}' +
+
+                // Element finden mit Scoring
                 'function findEl(step){' +
-                'var el=null;' +
-                'if(step.nm){el=document.querySelector("[name=\\""+CSS.escape(step.nm)+"\\"]");if(el){console.log("SWF findEl: name="+step.nm);return el;}}' +
-                'if(step.lb){var labels=document.querySelectorAll("label");' +
-                'for(var li=0;li<labels.length;li++){var lt=(labels[li].textContent||"").trim();' +
-                'if(lt===step.lb){' +
-                'if(labels[li].htmlFor){el=document.getElementById(labels[li].htmlFor);if(el){console.log("SWF findEl: label[for]="+step.lb);return el;}}' +
-                'el=labels[li].querySelector("input,select,textarea");if(el){console.log("SWF findEl: label>input="+step.lb);return el;}' +
-                'var td=labels[li].closest("td");if(td&&td.nextElementSibling){el=td.nextElementSibling.querySelector("input,select,textarea");if(el){console.log("SWF findEl: label~td>input="+step.lb);return el;}}' +
-                '}}}' +
-                'if(step.al){el=document.querySelector("[aria-label=\\""+CSS.escape(step.al)+"\\"]");if(el){console.log("SWF findEl: aria-label="+step.al);return el;}}' +
-                'if(step.ph){el=document.querySelector("[placeholder=\\""+CSS.escape(step.ph)+"\\"]");if(el){console.log("SWF findEl: placeholder="+step.ph);return el;}}' +
-                'el=step.c?$(step.c):null;' +
-                'if(el){console.log("SWF findEl: css="+step.c);return el;}' +
-                'if(step.x){try{var r=document.evaluate(step.x,document,null,XPathResult.FIRST_ORDERED_NODE_TYPE,null);if(r.singleNodeValue){console.log("SWF findEl: xpath");return r.singleNodeValue;}}catch(e){}}' +
-                'if(step.hr){el=document.querySelector("a[href=\\""+CSS.escape(step.hr)+"\\"]");if(el){console.log("SWF findEl: href="+step.hr);return el;}' +
-                'var links=document.querySelectorAll("a[href]");for(var i=0;i<links.length;i++){if(links[i].getAttribute("href").indexOf(step.hr)!==-1){console.log("SWF findEl: href~="+step.hr);return links[i];}}}' +
-                'if(step.ti){el=document.querySelector("[title=\\""+CSS.escape(step.ti)+"\\"]");if(el){console.log("SWF findEl: title="+step.ti);return el;}}' +
-                'if(step.tx&&step.tn){var tag=step.tn.toLowerCase();var all=document.querySelectorAll(tag);' +
-                'var txt=step.tx.trim().substring(0,50);' +
-                'for(var j=0;j<all.length;j++){var ct=(all[j].textContent||"").trim();if(ct===txt||(txt.length>10&&ct.indexOf(txt)!==-1)){console.log("SWF findEl: text+tag="+txt);return all[j];}}}' +
-                'if(step.rl&&step.tx){var byRole=document.querySelectorAll("[role=\\""+step.rl+"\\"]");' +
-                'for(var k=0;k<byRole.length;k++){if((byRole[k].textContent||"").trim().indexOf(step.tx.trim().substring(0,30))!==-1){console.log("SWF findEl: role+text");return byRole[k];}}}' +
-                'console.warn("SWF findEl: NICHT GEFUNDEN",JSON.stringify({c:step.c,nm:step.nm,lb:step.lb,al:step.al,ph:step.ph,tx:step.tx}));' +
-                'return null;}' +
+                'var trigger=(step.tr||step.d||"").trim();' +
+                'if(!trigger)return null;' +
+                'var alts=trigger.split("|").map(function(t){return t.trim()}).filter(Boolean);' +
+                'var elements=scanPage();' +
+                'for(var a=0;a<alts.length;a++){' +
+                'var search=alts[a].toLowerCase();' +
+                'var searchWords=extractWords(alts[a]);' +
+                'var exact=elements.find(function(i){return i.nameLower===search});' +
+                'if(exact)return exact.el;' +
+                'var bestMatch=null,bestScore=0;' +
+                'elements.forEach(function(item){' +
+                'var sc=calcScore(search,searchWords,item);' +
+                'if(sc>bestScore){bestScore=sc;bestMatch=item}});' +
+                'if(bestMatch&&bestScore>=50)return bestMatch.el}' +
+                'return null}' +
 
                 'function injectStyles(){' +
                 'if($("#swf-styles"))return;' +
