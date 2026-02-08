@@ -222,6 +222,7 @@
         .type-drag { background: #e64a19; }
         .type-local_action { background: #5d4037; }
         .type-wait { background: #616161; }
+        .type-highlight_area { background: #9c27b0; }
 
         /* Card Footer */
         .card-footer {
@@ -426,13 +427,13 @@
         // ==========================================
 
         function generatePlayerCode(tutorial) {
-            // Neues Datenformat mit Trigger-Feld
+            // Neues Datenformat mit Trigger-Feld + matchThreshold + triggerEnd
             var tutorialData = {
                 n: tutorial.name,
                 d: tutorial.description,
                 u: tutorial.startUrl,
                 s: (tutorial.steps || []).map(function(s) {
-                    return {
+                    var step = {
                         t: s.type,
                         d: s.description,
                         tr: s.trigger || s.description,  // Trigger für Element-Suche
@@ -443,6 +444,15 @@
                         v: s.exampleValue,
                         i: s.instruction
                     };
+                    // Match-Schwellenwert (nur wenn nicht Standard)
+                    if (s.matchThreshold && s.matchThreshold !== 50) {
+                        step.mt = s.matchThreshold;
+                    }
+                    // End-Trigger für Bereich-Markierung
+                    if (s.triggerEnd) {
+                        step.te = s.triggerEnd;
+                    }
+                    return step;
                 })
             };
 
@@ -504,10 +514,11 @@
                 'if(matched===searchWords.length)score+=50}' +
                 'return score}' +
 
-                // Element finden mit Scoring
-                'function findEl(step){' +
-                'var trigger=(step.tr||step.d||"").trim();' +
+                // Element finden mit Scoring und Schwellenwert
+                'function findEl(step,triggerOverride){' +
+                'var trigger=triggerOverride||(step.tr||step.d||"").trim();' +
                 'if(!trigger)return null;' +
+                'var threshold=step.mt||50;' +
                 'var alts=trigger.split("|").map(function(t){return t.trim()}).filter(Boolean);' +
                 'var elements=scanPage();' +
                 'for(var a=0;a<alts.length;a++){' +
@@ -519,7 +530,8 @@
                 'elements.forEach(function(item){' +
                 'var sc=calcScore(search,searchWords,item);' +
                 'if(sc>bestScore){bestScore=sc;bestMatch=item}});' +
-                'if(bestMatch&&bestScore>=50)return bestMatch.el}' +
+                'var minScore=50+(threshold-50);' +
+                'if(bestMatch&&bestScore>=minScore)return bestMatch.el}' +
                 'return null}' +
 
                 'function injectStyles(){' +
@@ -647,6 +659,13 @@
                 'showLocalAction(step,idx);' +
                 'return;' +
                 '}' +
+                // Bereich markieren: Zwei Elemente finden
+                'if(step.t==="highlight_area"&&step.te){' +
+                'var startEl=findEl(step);' +
+                'var endEl=findEl(step,step.te);' +
+                'if(startEl&&endEl){showAreaHighlight(startEl,endEl,step,idx);return}' +
+                'else if(startEl){showElementHighlight(startEl,step,idx);return}' +
+                '}' +
                 'var el=findEl(step);' +
                 'if(!el){' +
                 'var retryCount=step._retry||0;' +
@@ -659,6 +678,10 @@
                 'if(skip)showStep(idx+1);' +
                 'return;' +
                 '}' +
+                'showElementHighlight(el,step,idx);' +
+                '}' +
+                // Einzelnes Element highlighten
+                'function showElementHighlight(el,step,idx){' +
                 'var rect=el.getBoundingClientRect();' +
                 'var hl=$c("div",{className:"swf-highlight",id:"swf-highlight"});' +
                 'hl.style.cssText="position:absolute;top:"+(rect.top+window.scrollY-5)+"px;left:"+(rect.left+window.scrollX-5)+"px;width:"+(rect.width+10)+"px;height:"+(rect.height+10)+"px";' +
@@ -679,6 +702,33 @@
                 '$("#swf-close").onclick=cleanup;' +
                 'if($("#swf-prev"))$("#swf-prev").onclick=function(){cleanup();showStep(idx-1)};' +
                 'if($("#swf-skip"))$("#swf-skip").onclick=function(){cleanup();showStep(idx+1)};' +
+                '$("#swf-next").onclick=function(){cleanup();showStep(idx+1)};' +
+                '},300);' +
+                '}' +
+                // Bereich zwischen zwei Elementen highlighten
+                'function showAreaHighlight(startEl,endEl,step,idx){' +
+                'var r1=startEl.getBoundingClientRect();' +
+                'var r2=endEl.getBoundingClientRect();' +
+                'var areaRect={' +
+                'top:Math.min(r1.top,r2.top)-10,' +
+                'left:Math.min(r1.left,r2.left)-10,' +
+                'bottom:Math.max(r1.bottom,r2.bottom)+10,' +
+                'right:Math.max(r1.right,r2.right)+10};' +
+                'var hl=$c("div",{className:"swf-highlight",id:"swf-highlight"});' +
+                'hl.style.cssText="position:absolute;top:"+(areaRect.top+window.scrollY)+"px;left:"+(areaRect.left+window.scrollX)+"px;width:"+(areaRect.right-areaRect.left)+"px;height:"+(areaRect.bottom-areaRect.top)+"px;border-style:dashed;";' +
+                'document.body.appendChild(hl);' +
+                'startEl.scrollIntoView({behavior:"smooth",block:"center"});' +
+                'setTimeout(function(){' +
+                'var tt=$c("div",{className:"swf-tooltip",id:"swf-tooltip"});' +
+                'var navHtml="";' +
+                'if(idx>0)navHtml+="<button class=\\"swf-tooltip-btn swf-tooltip-btn-secondary\\" id=\\"swf-prev\\">\\u2190 Zur\\u00fcck</button>";' +
+                'navHtml+="<button class=\\"swf-tooltip-btn swf-tooltip-btn-primary\\" id=\\"swf-next\\">Weiter \\u2192</button>";' +
+                'tt.innerHTML="<div class=\\"swf-tooltip-header\\"><span class=\\"swf-tooltip-title\\">\\ud83c\\udf31 "+d.n+"</span><button class=\\"swf-tooltip-close\\" id=\\"swf-close\\">\\u00d7</button></div><div class=\\"swf-tooltip-body\\"><div class=\\"swf-tooltip-description\\">"+step.d+"</div><div class=\\"swf-tooltip-footer\\"><span class=\\"swf-tooltip-progress\\">Schritt "+(idx+1)+" von "+d.s.length+"</span><div class=\\"swf-tooltip-nav\\">"+navHtml+"</div></div></div>";' +
+                'var midTop=(areaRect.top+areaRect.bottom)/2+window.scrollY-100;' +
+                'tt.style.cssText="position:absolute;top:"+midTop+"px;left:"+Math.max(10,areaRect.left+window.scrollX-50)+"px";' +
+                'document.body.appendChild(tt);' +
+                '$("#swf-close").onclick=cleanup;' +
+                'if($("#swf-prev"))$("#swf-prev").onclick=function(){cleanup();showStep(idx-1)};' +
                 '$("#swf-next").onclick=function(){cleanup();showStep(idx+1)};' +
                 '},300);' +
                 '}' +
@@ -723,7 +773,8 @@
             navigate: 'Navigation',
             drag: 'Drag & Drop',
             local_action: 'Lokal',
-            wait: 'Warten'
+            wait: 'Warten',
+            highlight_area: 'Bereich'
         };
 
         function renderCard(tutorial) {

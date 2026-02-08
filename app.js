@@ -52,6 +52,9 @@
         stepType: document.getElementById('stepType'),
         stepDescription: document.getElementById('stepDescription'),
         stepSelector: document.getElementById('stepSelector'),
+        stepSelectorEnd: document.getElementById('stepSelectorEnd'),
+        stepMatchThreshold: document.getElementById('stepMatchThreshold'),
+        thresholdValue: document.getElementById('thresholdValue'),
         stepUrl: document.getElementById('stepUrl'),
         stepUrlPattern: document.getElementById('stepUrlPattern'),
         stepInputValue: document.getElementById('stepInputValue'),
@@ -59,6 +62,8 @@
         stepOptional: document.getElementById('stepOptional'),
         stepEntryPoint: document.getElementById('stepEntryPoint'),
         selectorGroup: document.getElementById('selectorGroup'),
+        selectorEndGroup: document.getElementById('selectorEndGroup'),
+        matchThresholdGroup: document.getElementById('matchThresholdGroup'),
         urlGroup: document.getElementById('urlGroup'),
         urlPatternGroup: document.getElementById('urlPatternGroup'),
         inputValueGroup: document.getElementById('inputValueGroup'),
@@ -324,6 +329,7 @@
         elements.stepType.value = (step && step.type) || 'click';
         elements.stepDescription.value = (step && step.description) || '';
         elements.stepSelector.value = (step && (step.trigger || step.selector)) || '';
+        elements.stepSelectorEnd.value = (step && step.triggerEnd) || '';
         elements.stepUrl.value = (step && step.url) || '';
         if (elements.stepUrlPattern) {
             elements.stepUrlPattern.value = (step && step.urlPattern) || '';
@@ -332,6 +338,11 @@
         elements.stepLocalInstruction.value = (step && step.instruction) || '';
         elements.stepOptional.checked = (step && step.optional) || false;
         elements.stepEntryPoint.checked = (step && step.isEntryPoint) || false;
+
+        // Match-Schwellenwert
+        var threshold = (step && step.matchThreshold) || 50;
+        elements.stepMatchThreshold.value = threshold;
+        elements.thresholdValue.textContent = threshold;
 
         updateStepModalFields();
         elements.stepModal.style.display = 'flex';
@@ -348,6 +359,8 @@
         elements.inputValueGroup.style.display = 'none';
         elements.localInstructionGroup.style.display = 'none';
         elements.selectorGroup.style.display = 'block';
+        elements.selectorEndGroup.style.display = 'none';
+        elements.matchThresholdGroup.style.display = 'block';
         elements.urlGroup.style.display = 'block';
         if (elements.urlPatternGroup) elements.urlPatternGroup.style.display = 'block';
 
@@ -358,18 +371,24 @@
             case 'local_action':
                 elements.localInstructionGroup.style.display = 'block';
                 elements.selectorGroup.style.display = 'none';
+                elements.matchThresholdGroup.style.display = 'none';
                 if (elements.urlPatternGroup) elements.urlPatternGroup.style.display = 'none';
                 break;
             case 'navigate':
             case 'wait':
                 elements.selectorGroup.style.display = 'none';
+                elements.matchThresholdGroup.style.display = 'none';
+                break;
+            case 'highlight_area':
+                elements.selectorEndGroup.style.display = 'block';
                 break;
         }
     }
 
     function saveStep() {
+        var stepType = elements.stepType.value;
         var step = {
-            type: elements.stepType.value,
+            type: stepType,
             description: elements.stepDescription.value,
             trigger: elements.stepSelector.value, // Trigger-Text für Element-Suche
             url: elements.stepUrl.value,
@@ -378,12 +397,23 @@
             isEntryPoint: elements.stepEntryPoint.checked
         };
 
-        if (elements.stepType.value === 'input') {
+        // Match-Schwellenwert (nur wenn nicht Standard)
+        var threshold = parseInt(elements.stepMatchThreshold.value);
+        if (threshold !== 50) {
+            step.matchThreshold = threshold;
+        }
+
+        if (stepType === 'input') {
             step.exampleValue = elements.stepInputValue.value;
         }
 
-        if (elements.stepType.value === 'local_action') {
+        if (stepType === 'local_action') {
             step.instruction = elements.stepLocalInstruction.value;
+        }
+
+        // Bereich markieren: End-Element speichern
+        if (stepType === 'highlight_area') {
+            step.triggerEnd = elements.stepSelectorEnd.value;
         }
 
         if (currentStepIndex !== null) {
@@ -426,7 +456,7 @@
             d: tutorial.description,
             u: tutorial.startUrl,
             s: tutorial.steps.map(function(s, idx) {
-                return {
+                var step = {
                     t: s.type,
                     d: s.description,
                     tr: s.trigger || s.description,
@@ -438,6 +468,15 @@
                     i: s.instruction,
                     idx: idx
                 };
+                // Match-Schwellenwert (nur wenn nicht Standard)
+                if (s.matchThreshold && s.matchThreshold !== 50) {
+                    step.mt = s.matchThreshold;
+                }
+                // End-Trigger für Bereich-Markierung
+                if (s.triggerEnd) {
+                    step.te = s.triggerEnd;
+                }
+                return step;
             })
         };
 
@@ -627,10 +666,13 @@ function extractWords(text) {
         .filter(function(w) { return w.length > 2; });
 }
 
-// VERBESSERTES MATCHING: Mehrere Strategien + ODER-Logik
-function findElement(step) {
-    var trigger = (step.tr || step.d || "").trim();
+// VERBESSERTES MATCHING: Mehrere Strategien + ODER-Logik + Schwellenwert
+function findElement(step, triggerOverride) {
+    var trigger = triggerOverride || (step.tr || step.d || "").trim();
     if (!trigger) return null;
+
+    // Match-Schwellenwert aus Step (Standard: 50)
+    var threshold = step.mt || 50;
 
     // ODER-Logik: Trigger kann mehrere Alternativen enthalten, getrennt durch |
     var alternatives = trigger.split("|").map(function(t) { return t.trim(); }).filter(Boolean);
@@ -640,7 +682,7 @@ function findElement(step) {
     // Für jede Alternative versuchen zu finden
     for (var altIdx = 0; altIdx < alternatives.length; altIdx++) {
         var altTrigger = alternatives[altIdx];
-        var result = findElementByTrigger(altTrigger, elements);
+        var result = findElementByTrigger(altTrigger, elements, threshold);
         if (result) {
             result.matchedTrigger = altTrigger;
             return result;
@@ -708,8 +750,9 @@ function calculateMatchScore(searchLower, searchWords, item) {
     return score;
 }
 
-// Einzelnen Trigger suchen - MIT SCORING
-function findElementByTrigger(trigger, elements) {
+// Einzelnen Trigger suchen - MIT SCORING UND SCHWELLENWERT
+function findElementByTrigger(trigger, elements, threshold) {
+    threshold = threshold || 50; // Standard-Schwellenwert
     var searchLower = trigger.toLowerCase();
     var searchWords = extractWords(trigger);
 
@@ -717,7 +760,7 @@ function findElementByTrigger(trigger, elements) {
     var match = elements.find(function(item) {
         return item.nameLower === searchLower;
     });
-    if (match) return { el: match.el, strategy: "exact" };
+    if (match) return { el: match.el, strategy: "exact", score: 1000 };
 
     // Strategie 2: Score-basiertes Matching - findet BESTEN Match
     var bestMatch = null;
@@ -732,9 +775,12 @@ function findElementByTrigger(trigger, elements) {
         }
     });
 
-    // Mindest-Score für einen Match (verhindert falsche Matches)
-    // Score muss mindestens 50 sein (= etwa 60% Wort-Übereinstimmung)
-    if (bestMatch && bestScore >= 50) {
+    // Dynamischer Mindest-Score basierend auf Schwellenwert
+    // Schwellenwert 50 = Mindest-Score 50 (Standard)
+    // Schwellenwert 100 = Mindest-Score 150 (sehr streng, fast nur exakte Matches)
+    var minScore = 50 + (threshold - 50);
+
+    if (bestMatch && bestScore >= minScore) {
         // Strategie-Namen basierend auf Score
         if (bestScore >= 150) bestStrategy = "partial";
         else if (bestScore >= 100) bestStrategy = "words-all";
@@ -1418,6 +1464,128 @@ function showHighlight(el, stepIdx, step) {
     };
 }
 
+// Bereich zwischen zwei Elementen highlighten
+function showAreaHighlight(startEl, endEl, stepIdx, step) {
+    removeHighlight();
+
+    // Zum Bereich scrollen
+    startEl.scrollIntoView({ behavior: "smooth", block: "center" });
+
+    // Bereichs-Rechteck berechnen
+    function getAreaRect() {
+        var r1 = startEl.getBoundingClientRect();
+        var r2 = endEl.getBoundingClientRect();
+        return {
+            top: Math.min(r1.top, r2.top) - 10,
+            left: Math.min(r1.left, r2.left) - 10,
+            bottom: Math.max(r1.bottom, r2.bottom) + 10,
+            right: Math.max(r1.right, r2.right) + 10
+        };
+    }
+
+    var areaRect = getAreaRect();
+
+    // Spotlight für den Bereich erstellen
+    createSpotlightForArea(areaRect);
+
+    // Highlight-Box für den Bereich
+    highlight = $c("div", { className: "swf-highlight swf-area-highlight", id: "swf-highlight" });
+    highlight.style.cssText = "position:fixed;top:" + areaRect.top + "px;left:" + areaRect.left + "px;width:" + (areaRect.right - areaRect.left) + "px;height:" + (areaRect.bottom - areaRect.top) + "px;border-style:dashed;";
+    document.body.appendChild(highlight);
+
+    function updatePosition() {
+        if (!highlight || !document.body.contains(highlight)) return;
+        var r = getAreaRect();
+        highlight.style.cssText = "position:fixed;top:" + r.top + "px;left:" + r.left + "px;width:" + (r.right - r.left) + "px;height:" + (r.bottom - r.top) + "px;border-style:dashed;";
+        if (spotlight && spotlight._updateArea) {
+            spotlight._updateArea(r);
+        }
+    }
+
+    window.setTimeout(function() {
+        updatePosition();
+        if (step) {
+            // Tooltip in der Mitte des Bereichs
+            var rect = getAreaRect();
+            var fakeEl = { getBoundingClientRect: function() { return { top: rect.top, bottom: rect.bottom, left: rect.left, right: rect.right, width: rect.right - rect.left, height: rect.bottom - rect.top }; } };
+            createTooltip(fakeEl, step, stepIdx);
+        }
+    }, 400);
+
+    var scrollCount = 0;
+    var scrollInterval = window.setInterval(function() {
+        updatePosition();
+        scrollCount++;
+        if (scrollCount > 20) window.clearInterval(scrollInterval);
+    }, 50);
+
+    var onScroll = function() { updatePosition(); };
+    window.addEventListener("scroll", onScroll, true);
+    window.addEventListener("resize", onScroll);
+
+    highlight._cleanup = function() {
+        window.clearInterval(scrollInterval);
+        window.removeEventListener("scroll", onScroll, true);
+        window.removeEventListener("resize", onScroll);
+        removeSpotlight();
+        removeTooltip();
+    };
+}
+
+// Spotlight für Bereich erstellen
+function createSpotlightForArea(rect) {
+    removeSpotlight();
+    var padding = 0; // Bereits in rect eingerechnet
+
+    spotlight = $c("div", { id: "swf-spotlight" });
+    spotlight.style.cssText = "position:fixed;top:0;left:0;width:100%;height:100%;z-index:2147483640;pointer-events:none;";
+
+    var svgNS = "http://www.w3.org/2000/svg";
+    var svg = document.createElementNS(svgNS, "svg");
+    svg.setAttribute("width", "100%");
+    svg.setAttribute("height", "100%");
+    svg.style.cssText = "position:absolute;top:0;left:0;";
+
+    var defs = document.createElementNS(svgNS, "defs");
+    var mask = document.createElementNS(svgNS, "mask");
+    mask.setAttribute("id", "swf-spotlight-mask");
+
+    var bgRect = document.createElementNS(svgNS, "rect");
+    bgRect.setAttribute("width", "100%");
+    bgRect.setAttribute("height", "100%");
+    bgRect.setAttribute("fill", "white");
+
+    var hole = document.createElementNS(svgNS, "rect");
+    hole.setAttribute("x", rect.left);
+    hole.setAttribute("y", rect.top);
+    hole.setAttribute("width", rect.right - rect.left);
+    hole.setAttribute("height", rect.bottom - rect.top);
+    hole.setAttribute("rx", "8");
+    hole.setAttribute("fill", "black");
+
+    mask.appendChild(bgRect);
+    mask.appendChild(hole);
+    defs.appendChild(mask);
+    svg.appendChild(defs);
+
+    var overlay = document.createElementNS(svgNS, "rect");
+    overlay.setAttribute("width", "100%");
+    overlay.setAttribute("height", "100%");
+    overlay.setAttribute("fill", "rgba(0,0,0,0.6)");
+    overlay.setAttribute("mask", "url(#swf-spotlight-mask)");
+    svg.appendChild(overlay);
+
+    spotlight.appendChild(svg);
+    document.body.appendChild(spotlight);
+
+    spotlight._updateArea = function(newRect) {
+        hole.setAttribute("x", newRect.left);
+        hole.setAttribute("y", newRect.top);
+        hole.setAttribute("width", newRect.right - newRect.left);
+        hole.setAttribute("height", newRect.bottom - newRect.top);
+    };
+}
+
 function removeHighlight() {
     if (highlight) {
         if (highlight._cleanup) highlight._cleanup();
@@ -1499,6 +1667,27 @@ function goToStep(idx) {
     // Lokale Aktionen
     if (step.t === "local_action" || step.t === "navigate" || step.t === "wait") {
         updateCurrentStepPanel(step, idx, true, null);
+        return;
+    }
+
+    // Bereich markieren: Zwei Elemente finden und Bereich highlighten
+    if (step.t === "highlight_area" && step.te) {
+        waitForElement(step, function(startEl, startStrategy) {
+            if (!startEl) {
+                updateCurrentStepPanel(step, idx, false, null);
+                return;
+            }
+            // End-Element mit separatem Trigger suchen
+            var endResult = findElement(step, step.te);
+            if (endResult && endResult.el) {
+                showAreaHighlight(startEl, endResult.el, idx, step);
+                updateCurrentStepPanel(step, idx, true, startStrategy);
+            } else {
+                // Fallback: Nur Start-Element highlighten
+                showHighlight(startEl, idx, step);
+                updateCurrentStepPanel(step, idx, true, startStrategy);
+            }
+        });
         return;
     }
 
@@ -2020,6 +2209,13 @@ function cleanup() {
 
         if (elements.stepType) {
             elements.stepType.addEventListener('change', updateStepModalFields);
+        }
+
+        // Match-Schwellenwert Slider
+        if (elements.stepMatchThreshold) {
+            elements.stepMatchThreshold.addEventListener('input', function() {
+                elements.thresholdValue.textContent = this.value;
+            });
         }
 
         // Bookmarklet kopieren

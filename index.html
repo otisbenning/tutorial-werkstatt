@@ -131,6 +131,7 @@
                             <option value="drag">Drag & Drop</option>
                             <option value="local_action">Lokale Aktion</option>
                             <option value="wait">Warten</option>
+                            <option value="highlight_area">Bereich markieren</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -141,6 +142,16 @@
                         <label for="stepSelector">Trigger-Text (Element-Beschriftung):</label>
                         <input type="text" id="stepSelector" placeholder="z.B. 'Speichern' oder 'Option A | Option B'">
                         <small class="hint">Der sichtbare Text des Elements. Für Alternativen: Text1 | Text2 (ODER-Verknüpfung)</small>
+                    </div>
+                    <div class="form-group" id="selectorEndGroup" style="display: none;">
+                        <label for="stepSelectorEnd">End-Element (für Bereich):</label>
+                        <input type="text" id="stepSelectorEnd" placeholder="z.B. 'Abbrechen' - definiert das Ende des Bereichs">
+                        <small class="hint">Der Bereich zwischen Start- und End-Element wird hervorgehoben</small>
+                    </div>
+                    <div class="form-group" id="matchThresholdGroup">
+                        <label for="stepMatchThreshold">Match-Genauigkeit: <span id="thresholdValue">50</span>%</label>
+                        <input type="range" id="stepMatchThreshold" min="30" max="100" value="50" step="5">
+                        <small class="hint">Höher = strenger (exaktere Übereinstimmung erforderlich). Standard: 50%</small>
                     </div>
                     <div class="form-group" id="urlGroup">
                         <label for="stepUrl">Erwartete URL (optional):</label>
